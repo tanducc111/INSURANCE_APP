@@ -15,11 +15,23 @@ Copy-Item .env.example .env
 docker compose up --build
 ```
 
+In a second terminal, apply migrations and seed the first admin:
+
+```powershell
+docker compose exec api alembic upgrade head
+docker compose exec api python -m app.db.seed
+```
+
 Open:
 
 - Web: http://localhost:3000
 - API health: http://localhost:8000/health
 - API docs: http://localhost:8000/docs
+
+Default local admin from `.env.example`:
+
+- Email: `admin@insurance.local`
+- Password: `ChangeMe123!`
 
 ## Backend Local Development
 
@@ -45,8 +57,11 @@ npm run dev
 Run migrations from the API container:
 
 ```powershell
-docker compose exec api alembic revision --autogenerate -m "initial foundation"
 docker compose exec api alembic upgrade head
 ```
 
-No business tables are included in Phase 1, so the first generated migration may be empty until domain models are added.
+Create a new migration after model changes:
+
+```powershell
+docker compose exec api alembic revision --autogenerate -m "describe change"
+```

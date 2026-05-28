@@ -1,5 +1,5 @@
 from app.models.base import Base
+from app.models.audit import ActivityLog, LoginHistory
+from app.models.user import User
 
-# Import future SQLAlchemy models here so Alembic can discover metadata.
-
-__all__ = ["Base"]
+__all__ = ["ActivityLog", "Base", "LoginHistory", "User"]

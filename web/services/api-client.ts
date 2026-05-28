@@ -1,6 +1,10 @@
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
+type ApiFetchOptions = RequestInit & {
+  token?: string | null;
+};
+
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -13,18 +17,29 @@ export class ApiError extends Error {
 
 export async function apiFetch<T>(
   path: string,
-  options: RequestInit = {},
+  options: ApiFetchOptions = {},
 ): Promise<T> {
+  const { token, ...fetchOptions } = options;
+  const headers = new Headers(fetchOptions.headers);
+  if (!headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
+    ...fetchOptions,
+    headers,
   });
 
   if (!response.ok) {
-    throw new ApiError(response.statusText, response.status);
+    const errorPayload = await response.json().catch(() => null);
+    const message =
+      typeof errorPayload?.detail === "string"
+        ? errorPayload.detail
+        : response.statusText;
+    throw new ApiError(message, response.status);
   }
 
   return response.json() as Promise<T>;

@@ -17,6 +17,12 @@ class Settings(BaseSettings):
         "@localhost:5432/insurance_app"
     )
     BACKEND_CORS_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000"
+    SECRET_KEY: str = "change-me-in-production"
+    JWT_ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+    SEED_ADMIN_EMAIL: str = "admin@insurance.local"
+    SEED_ADMIN_PASSWORD: str = "ChangeMe123!"
+    SEED_ADMIN_FULL_NAME: str = "System Administrator"
 
     @property
     def cors_origins(self) -> list[str]:
