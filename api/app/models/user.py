@@ -51,3 +51,13 @@ class User(IDMixin, TimestampMixin, Base):
 
     login_history = relationship("LoginHistory", back_populates="user")
     activity_logs = relationship("ActivityLog", back_populates="actor")
+    employee_profile = relationship(
+        "Employee",
+        back_populates="user",
+        uselist=False,
+    )
+    customer_profile = relationship(
+        "Customer",
+        back_populates="user",
+        uselist=False,
+    )

@@ -23,6 +23,21 @@ const navigationItems: NavigationItem[] = [
     roles: ["ADMIN"],
   },
   {
+    href: "/dashboard/admin/employees",
+    label: "Employees",
+    roles: ["ADMIN"],
+  },
+  {
+    href: "/dashboard/admin/customers",
+    label: "Customers",
+    roles: ["ADMIN"],
+  },
+  {
+    href: "/dashboard/admin/assignments",
+    label: "Assignments",
+    roles: ["ADMIN"],
+  },
+  {
     href: "/dashboard/admin/insurance/packages",
     label: "Insurance Packages",
     roles: ["ADMIN"],
@@ -31,6 +46,16 @@ const navigationItems: NavigationItem[] = [
     href: "/dashboard/admin/insurance/processes",
     label: "Insurance Processes",
     roles: ["ADMIN"],
+  },
+  {
+    href: "/dashboard/employee/customers",
+    label: "Assigned Customers",
+    roles: ["EMPLOYEE"],
+  },
+  {
+    href: "/dashboard/customer/profile",
+    label: "My Profile",
+    roles: ["CUSTOMER"],
   },
 ];
 

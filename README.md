@@ -61,6 +61,7 @@ docker compose exec api alembic upgrade head
 ```
 
 Phase 3 adds the insurance package, process, and process step tables through the latest Alembic migration.
+Phase 4 adds employee, customer, assignment, and follow-up note tables through the latest Alembic migration.
 
 Create a new migration after model changes:
 
