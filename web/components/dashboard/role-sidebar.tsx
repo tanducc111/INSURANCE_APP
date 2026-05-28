@@ -22,6 +22,16 @@ const navigationItems: NavigationItem[] = [
     label: "User Management",
     roles: ["ADMIN"],
   },
+  {
+    href: "/dashboard/admin/insurance/packages",
+    label: "Insurance Packages",
+    roles: ["ADMIN"],
+  },
+  {
+    href: "/dashboard/admin/insurance/processes",
+    label: "Insurance Processes",
+    roles: ["ADMIN"],
+  },
 ];
 
 export function RoleSidebar({ user }: { user: AuthUser }) {
@@ -39,7 +49,8 @@ export function RoleSidebar({ user }: { user: AuthUser }) {
       </div>
       <nav className="mt-8 space-y-2 text-sm font-medium text-slate-600">
         {items.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive =
+            pathname === item.href || pathname.startsWith(`${item.href}/`);
           return (
             <Link
               className={`block rounded-md px-3 py-2 transition ${

@@ -60,6 +60,8 @@ Run migrations from the API container:
 docker compose exec api alembic upgrade head
 ```
 
+Phase 3 adds the insurance package, process, and process step tables through the latest Alembic migration.
+
 Create a new migration after model changes:
 
 ```powershell
