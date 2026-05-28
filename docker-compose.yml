@@ -1,0 +1,52 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: insurance_postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-insurance_app}
+      POSTGRES_USER: ${POSTGRES_USER:-insurance_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-insurance_password}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-insurance_user} -d ${POSTGRES_DB:-insurance_app}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: ./api
+    container_name: insurance_api
+    environment:
+      PROJECT_NAME: ${PROJECT_NAME:-Insurance Management System API}
+      API_VERSION: ${API_VERSION:-0.1.0}
+      ENVIRONMENT: ${ENVIRONMENT:-local}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-insurance_user}:${POSTGRES_PASSWORD:-insurance_password}@postgres:5432/${POSTGRES_DB:-insurance_app}
+      BACKEND_CORS_ORIGINS: ${BACKEND_CORS_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./api:/app
+
+  web:
+    build:
+      context: ./web
+    container_name: insurance_web
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    depends_on:
+      - api
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./web:/app
+      - /app/node_modules
+
+volumes:
+  postgres_data:
