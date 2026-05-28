@@ -9,17 +9,23 @@ import {
   listAssignedCustomers,
   listFollowUpNotes,
 } from "@/services/customer-management-service";
+import { listEmployeeCustomerSubscriptions } from "@/services/subscription-service";
 import type { Customer, FollowUpNote } from "@/types/customer-management";
+import type { CustomerInsuranceSubscription } from "@/types/subscription";
 
 export default function EmployeeCustomersPage() {
   const { isReady, token } = useRoleAccess(["EMPLOYEE"]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [notes, setNotes] = useState<FollowUpNote[]>([]);
+  const [subscriptions, setSubscriptions] = useState<
+    CustomerInsuranceSubscription[]
+  >([]);
   const [selectedCustomerId, setSelectedCustomerId] = useState<number | null>(null);
   const [note, setNote] = useState("");
   const [nextActionAt, setNextActionAt] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isNotesLoading, setIsNotesLoading] = useState(false);
+  const [isSubscriptionsLoading, setIsSubscriptionsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -61,6 +67,27 @@ export default function EmployeeCustomersPage() {
     }
   }
 
+  async function loadSubscriptions(customerId: number) {
+    if (!token) {
+      return;
+    }
+
+    setIsSubscriptionsLoading(true);
+    setError(null);
+    try {
+      const data = await listEmployeeCustomerSubscriptions(token, customerId, {
+        limit: 100,
+      });
+      setSubscriptions(data);
+    } catch (err) {
+      setError(
+        err instanceof ApiError ? err.message : "Unable to load subscriptions",
+      );
+    } finally {
+      setIsSubscriptionsLoading(false);
+    }
+  }
+
   useEffect(() => {
     if (isReady) {
       void loadCustomers();
@@ -70,8 +97,10 @@ export default function EmployeeCustomersPage() {
   useEffect(() => {
     if (selectedCustomerId) {
       void loadNotes(selectedCustomerId);
+      void loadSubscriptions(selectedCustomerId);
     } else {
       setNotes([]);
+      setSubscriptions([]);
     }
   }, [selectedCustomerId, token]);
 
@@ -164,6 +193,50 @@ export default function EmployeeCustomersPage() {
               <p className="mt-4 text-sm font-medium text-slate-500">
                 Select a customer to view details.
               </p>
+            )}
+          </div>
+
+          <div className="rounded-md border border-slate-200 bg-white p-5 shadow-sm">
+            <h2 className="text-lg font-semibold">Subscriptions</h2>
+            {isSubscriptionsLoading ? (
+              <p className="mt-5 text-sm font-medium text-slate-500">
+                Loading...
+              </p>
+            ) : subscriptions.length === 0 ? (
+              <p className="mt-5 text-sm font-medium text-slate-500">
+                No subscriptions found.
+              </p>
+            ) : (
+              <div className="mt-5 overflow-x-auto">
+                <table className="w-full min-w-[680px] text-left text-sm">
+                  <thead className="bg-slate-50 text-xs uppercase text-slate-500">
+                    <tr>
+                      <th className="px-4 py-3">Policy</th>
+                      <th className="px-4 py-3">Package</th>
+                      <th className="px-4 py-3">Status</th>
+                      <th className="px-4 py-3">Payment</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200">
+                    {subscriptions.map((subscription) => (
+                      <tr key={subscription.id}>
+                        <td className="px-4 py-3">
+                          {subscription.policy_number}
+                        </td>
+                        <td className="px-4 py-3">
+                          {subscription.package_name}
+                        </td>
+                        <td className="px-4 py-3 capitalize">
+                          {subscription.status}
+                        </td>
+                        <td className="px-4 py-3 capitalize">
+                          {subscription.payment_status}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
 

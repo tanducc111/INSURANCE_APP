@@ -7,6 +7,7 @@ from app.models.customer_management import (
     FollowUpNote,
 )
 from app.models.insurance import InsurancePackage, InsuranceProcess, ProcessStep
+from app.models.subscription import CustomerInsuranceSubscription
 from app.models.user import User
 
 __all__ = [
@@ -14,6 +15,7 @@ __all__ = [
     "Base",
     "Customer",
     "CustomerAssignment",
+    "CustomerInsuranceSubscription",
     "Employee",
     "FollowUpNote",
     "InsurancePackage",

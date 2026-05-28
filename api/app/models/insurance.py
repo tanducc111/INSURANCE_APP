@@ -42,6 +42,11 @@ class InsurancePackage(IDMixin, TimestampMixin, Base):
         back_populates="package",
         cascade="all, delete-orphan",
     )
+    subscriptions = relationship(
+        "CustomerInsuranceSubscription",
+        back_populates="package",
+        cascade="all, delete-orphan",
+    )
 
 
 class InsuranceProcess(IDMixin, TimestampMixin, Base):

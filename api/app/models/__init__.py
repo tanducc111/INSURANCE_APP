@@ -14,6 +14,11 @@ from app.models.insurance import (
     InsuranceStatus,
     ProcessStep,
 )
+from app.models.subscription import (
+    CustomerInsuranceSubscription,
+    PaymentStatus,
+    SubscriptionStatus,
+)
 from app.models.user import User, UserRole, UserStatus
 
 __all__ = [
@@ -21,13 +26,16 @@ __all__ = [
     "AssignmentStatus",
     "Customer",
     "CustomerAssignment",
+    "CustomerInsuranceSubscription",
     "Employee",
     "FollowUpNote",
     "InsurancePackage",
     "InsuranceProcess",
     "InsuranceStatus",
     "LoginHistory",
+    "PaymentStatus",
     "ProcessStep",
+    "SubscriptionStatus",
     "User",
     "UserRole",
     "UserStatus",

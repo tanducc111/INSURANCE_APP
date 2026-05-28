@@ -6,6 +6,7 @@ from app.api.routers.auth import router as auth_router
 from app.api.routers.customer_management import router as customer_management_router
 from app.api.routers.health import router as health_router
 from app.api.routers.insurance import router as insurance_router
+from app.api.routers.subscriptions import router as subscriptions_router
 from app.core.config import settings
 
 
@@ -30,6 +31,7 @@ def create_app() -> FastAPI:
     app.include_router(admin_users_router)
     app.include_router(insurance_router)
     app.include_router(customer_management_router)
+    app.include_router(subscriptions_router)
 
     return app
 

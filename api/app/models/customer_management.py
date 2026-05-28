@@ -72,6 +72,11 @@ class Customer(IDMixin, TimestampMixin, Base):
         cascade="all, delete-orphan",
     )
     follow_up_notes = relationship("FollowUpNote", back_populates="customer")
+    subscriptions = relationship(
+        "CustomerInsuranceSubscription",
+        back_populates="customer",
+        cascade="all, delete-orphan",
+    )
 
     @property
     def email(self) -> str:

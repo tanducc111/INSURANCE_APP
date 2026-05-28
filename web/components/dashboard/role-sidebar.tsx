@@ -38,6 +38,11 @@ const navigationItems: NavigationItem[] = [
     roles: ["ADMIN"],
   },
   {
+    href: "/dashboard/admin/subscriptions",
+    label: "Subscriptions",
+    roles: ["ADMIN"],
+  },
+  {
     href: "/dashboard/admin/insurance/packages",
     label: "Insurance Packages",
     roles: ["ADMIN"],
@@ -55,6 +60,11 @@ const navigationItems: NavigationItem[] = [
   {
     href: "/dashboard/customer/profile",
     label: "My Profile",
+    roles: ["CUSTOMER"],
+  },
+  {
+    href: "/dashboard/customer/subscriptions",
+    label: "My Subscriptions",
     roles: ["CUSTOMER"],
   },
 ];
