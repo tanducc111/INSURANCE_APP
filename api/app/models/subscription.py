@@ -64,6 +64,11 @@ class CustomerInsuranceSubscription(IDMixin, TimestampMixin, Base):
 
     customer = relationship("Customer", back_populates="subscriptions")
     package = relationship("InsurancePackage", back_populates="subscriptions")
+    claims = relationship(
+        "Claim",
+        back_populates="subscription",
+        cascade="all, delete-orphan",
+    )
 
     @property
     def customer_name(self) -> str:

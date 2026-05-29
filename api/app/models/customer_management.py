@@ -33,6 +33,7 @@ class Employee(IDMixin, TimestampMixin, Base):
         cascade="all, delete-orphan",
     )
     follow_up_notes = relationship("FollowUpNote", back_populates="employee")
+    assigned_claims = relationship("Claim", back_populates="assigned_employee")
 
     @property
     def email(self) -> str:
@@ -74,6 +75,11 @@ class Customer(IDMixin, TimestampMixin, Base):
     follow_up_notes = relationship("FollowUpNote", back_populates="customer")
     subscriptions = relationship(
         "CustomerInsuranceSubscription",
+        back_populates="customer",
+        cascade="all, delete-orphan",
+    )
+    claims = relationship(
+        "Claim",
         back_populates="customer",
         cascade="all, delete-orphan",
     )

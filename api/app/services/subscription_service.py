@@ -1,10 +1,12 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.models.claim import ClaimStatus
 from app.models.customer_management import Employee
 from app.models.subscription import CustomerInsuranceSubscription, SubscriptionStatus
 from app.models.user import User
 from app.repositories.audit_repository import AuditRepository
+from app.repositories.claim_repository import ClaimDashboardRepository
 from app.repositories.customer_management_repository import (
     AssignmentRepository,
     CustomerRepository,
@@ -237,6 +239,11 @@ class DashboardService:
                 db,
                 SubscriptionStatus.PENDING,
             ),
+            open_claims=ClaimDashboardRepository.count_open_claims(db),
+            approved_claims=ClaimDashboardRepository.count_claims(
+                db,
+                status_filter=ClaimStatus.APPROVED,
+            ),
             subscription_status_chart=status_chart,
             package_registration_chart=package_chart,
         )
@@ -253,6 +260,10 @@ class DashboardService:
                 customer_ids=customer_ids,
             ),
             pending_follow_ups=DashboardRepository.pending_follow_ups(db, employee.id),
+            open_claims_count=ClaimDashboardRepository.count_open_claims(
+                db,
+                customer_ids=customer_ids,
+            ),
         )
 
     @staticmethod
@@ -278,6 +289,10 @@ class DashboardService:
             expired_packages=DashboardRepository.count_subscriptions(
                 db,
                 SubscriptionStatus.EXPIRED,
+                customer_ids=[customer.id],
+            ),
+            open_claims=ClaimDashboardRepository.count_open_claims(
+                db,
                 customer_ids=[customer.id],
             ),
             assigned_employee=assignment.employee if assignment else None,

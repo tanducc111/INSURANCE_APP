@@ -1,5 +1,6 @@
 from app.models.base import Base
 from app.models.audit import ActivityLog, LoginHistory
+from app.models.claim import Claim, ClaimAttachment
 from app.models.customer_management import (
     Customer,
     CustomerAssignment,
@@ -13,6 +14,8 @@ from app.models.user import User
 __all__ = [
     "ActivityLog",
     "Base",
+    "Claim",
+    "ClaimAttachment",
     "Customer",
     "CustomerAssignment",
     "CustomerInsuranceSubscription",

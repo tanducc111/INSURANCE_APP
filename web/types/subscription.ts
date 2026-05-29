@@ -44,6 +44,8 @@ export type AdminDashboardStats = {
   total_packages: number;
   active_subscriptions: number;
   pending_subscriptions: number;
+  open_claims: number;
+  approved_claims: number;
   subscription_status_chart: ChartDataPoint[];
   package_registration_chart: ChartDataPoint[];
 };
@@ -52,11 +54,13 @@ export type EmployeeDashboardStats = {
   assigned_customers_count: number;
   active_subscriptions_count: number;
   pending_follow_ups: number;
+  open_claims_count: number;
 };
 
 export type CustomerDashboardStats = {
   active_packages: number;
   expired_packages: number;
+  open_claims: number;
   assigned_employee: Employee | null;
   latest_subscriptions: CustomerInsuranceSubscription[];
 };

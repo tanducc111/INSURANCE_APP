@@ -99,7 +99,7 @@ export default function DashboardPage() {
 
       {role === "ADMIN" && adminStats ? (
         <section className="mt-6 space-y-6">
-          <div className="grid gap-4 md:grid-cols-5">
+          <div className="grid gap-4 md:grid-cols-4 xl:grid-cols-7">
             <StatCard label="Customers" value={adminStats.total_customers} />
             <StatCard label="Employees" value={adminStats.total_employees} />
             <StatCard label="Packages" value={adminStats.total_packages} />
@@ -111,6 +111,8 @@ export default function DashboardPage() {
               label="Pending subs"
               value={adminStats.pending_subscriptions}
             />
+            <StatCard label="Open claims" value={adminStats.open_claims} />
+            <StatCard label="Approved claims" value={adminStats.approved_claims} />
           </div>
 
           <div className="grid gap-6 lg:grid-cols-2">
@@ -170,7 +172,7 @@ export default function DashboardPage() {
       ) : null}
 
       {role === "EMPLOYEE" && employeeStats ? (
-        <section className="mt-6 grid gap-4 md:grid-cols-3">
+        <section className="mt-6 grid gap-4 md:grid-cols-4">
           <StatCard
             label="Assigned customers"
             value={employeeStats.assigned_customers_count}
@@ -180,14 +182,16 @@ export default function DashboardPage() {
             value={employeeStats.active_subscriptions_count}
           />
           <StatCard label="Pending follow-ups" value={employeeStats.pending_follow_ups} />
+          <StatCard label="Open claims" value={employeeStats.open_claims_count} />
         </section>
       ) : null}
 
       {role === "CUSTOMER" && customerStats ? (
         <section className="mt-6 space-y-6">
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-4">
             <StatCard label="Active packages" value={customerStats.active_packages} />
             <StatCard label="Expired packages" value={customerStats.expired_packages} />
+            <StatCard label="Open claims" value={customerStats.open_claims} />
             <StatCard
               label="Assigned employee"
               value={customerStats.assigned_employee?.full_name ?? "Unassigned"}

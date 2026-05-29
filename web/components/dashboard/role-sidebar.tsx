@@ -43,6 +43,11 @@ const navigationItems: NavigationItem[] = [
     roles: ["ADMIN"],
   },
   {
+    href: "/dashboard/admin/claims",
+    label: "Claims",
+    roles: ["ADMIN"],
+  },
+  {
     href: "/dashboard/admin/insurance/packages",
     label: "Insurance Packages",
     roles: ["ADMIN"],
@@ -58,6 +63,11 @@ const navigationItems: NavigationItem[] = [
     roles: ["EMPLOYEE"],
   },
   {
+    href: "/dashboard/employee/claims",
+    label: "Claims Review",
+    roles: ["EMPLOYEE"],
+  },
+  {
     href: "/dashboard/customer/profile",
     label: "My Profile",
     roles: ["CUSTOMER"],
@@ -65,6 +75,16 @@ const navigationItems: NavigationItem[] = [
   {
     href: "/dashboard/customer/subscriptions",
     label: "My Subscriptions",
+    roles: ["CUSTOMER"],
+  },
+  {
+    href: "/dashboard/customer/claims",
+    label: "My Claims",
+    roles: ["CUSTOMER"],
+  },
+  {
+    href: "/dashboard/customer/report-incident",
+    label: "Report Incident",
     roles: ["CUSTOMER"],
   },
 ];

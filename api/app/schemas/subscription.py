@@ -56,6 +56,8 @@ class AdminDashboardStats(BaseModel):
     total_packages: int
     active_subscriptions: int
     pending_subscriptions: int
+    open_claims: int
+    approved_claims: int
     subscription_status_chart: list[ChartDataPoint]
     package_registration_chart: list[ChartDataPoint]
 
@@ -64,10 +66,12 @@ class EmployeeDashboardStats(BaseModel):
     assigned_customers_count: int
     active_subscriptions_count: int
     pending_follow_ups: int
+    open_claims_count: int
 
 
 class CustomerDashboardStats(BaseModel):
     active_packages: int
     expired_packages: int
+    open_claims: int
     assigned_employee: EmployeeRead | None
     latest_subscriptions: list[CustomerInsuranceSubscriptionRead]
