@@ -27,6 +27,7 @@ from app.models.insurance import (
     InsuranceStatus,
     ProcessStep,
 )
+from app.models.rag import Document, DocumentChunk
 from app.models.subscription import (
     CustomerInsuranceSubscription,
     PaymentStatus,
@@ -49,6 +50,8 @@ __all__ = [
     "Customer",
     "CustomerAssignment",
     "CustomerInsuranceSubscription",
+    "Document",
+    "DocumentChunk",
     "Employee",
     "FollowUpNote",
     "InsurancePackage",

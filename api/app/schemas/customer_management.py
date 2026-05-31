@@ -1,13 +1,15 @@
 from datetime import date, datetime
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.customer_management import AssignmentStatus
 from app.models.user import UserStatus
 
+EMAIL_PATTERN = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
+
 
 class EmployeeCreate(BaseModel):
-    email: EmailStr
+    email: str = Field(min_length=3, max_length=255, pattern=EMAIL_PATTERN)
     password: str = Field(min_length=8, max_length=128)
     full_name: str = Field(min_length=1, max_length=255)
     status: UserStatus = UserStatus.ACTIVE
@@ -31,7 +33,7 @@ class EmployeeRead(BaseModel):
 
     id: int
     user_id: int
-    email: EmailStr
+    email: str
     full_name: str
     status: UserStatus
     employee_code: str
@@ -43,7 +45,7 @@ class EmployeeRead(BaseModel):
 
 
 class CustomerCreate(BaseModel):
-    email: EmailStr
+    email: str = Field(min_length=3, max_length=255, pattern=EMAIL_PATTERN)
     password: str = Field(min_length=8, max_length=128)
     full_name: str = Field(min_length=1, max_length=255)
     status: UserStatus = UserStatus.ACTIVE
@@ -67,7 +69,7 @@ class CustomerRead(BaseModel):
 
     id: int
     user_id: int
-    email: EmailStr
+    email: str
     full_name: str
     status: UserStatus
     customer_code: str

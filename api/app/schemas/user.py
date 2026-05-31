@@ -1,12 +1,16 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.user import UserRole, UserStatus
 
 
 class UserBase(BaseModel):
-    email: EmailStr
+    email: str = Field(
+        min_length=3,
+        max_length=255,
+        pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$",
+    )
     full_name: str = Field(min_length=1, max_length=255)
     role: UserRole
 

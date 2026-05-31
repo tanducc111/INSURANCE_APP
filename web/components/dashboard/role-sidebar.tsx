@@ -53,6 +53,11 @@ const navigationItems: NavigationItem[] = [
     roles: ["ADMIN"],
   },
   {
+    href: "/dashboard/admin/documents",
+    label: "Documents",
+    roles: ["ADMIN"],
+  },
+  {
     href: "/dashboard/admin/insurance/packages",
     label: "Insurance Packages",
     roles: ["ADMIN"],
@@ -115,6 +120,11 @@ const navigationItems: NavigationItem[] = [
   {
     href: "/dashboard/customer/book-appointment",
     label: "Book Appointment",
+    roles: ["CUSTOMER"],
+  },
+  {
+    href: "/dashboard/customer/chatbot",
+    label: "Company Chatbot",
     roles: ["CUSTOMER"],
   },
 ];

@@ -8,6 +8,7 @@ from app.api.routers.communication import router as communication_router
 from app.api.routers.customer_management import router as customer_management_router
 from app.api.routers.health import router as health_router
 from app.api.routers.insurance import router as insurance_router
+from app.api.routers.rag import router as rag_router
 from app.api.routers.subscriptions import router as subscriptions_router
 from app.core.config import settings
 
@@ -36,6 +37,7 @@ def create_app() -> FastAPI:
     app.include_router(subscriptions_router)
     app.include_router(claims_router)
     app.include_router(communication_router)
+    app.include_router(rag_router)
 
     return app
 

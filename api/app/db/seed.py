@@ -12,6 +12,19 @@ from app.schemas.user import UserCreate
 def seed_admin(db: Session) -> None:
     existing_admin = UserRepository.get_by_email(db, settings.SEED_ADMIN_EMAIL)
     if existing_admin:
+        existing_admin.password_hash = get_password_hash(settings.SEED_ADMIN_PASSWORD)
+        existing_admin.full_name = settings.SEED_ADMIN_FULL_NAME
+        existing_admin.role = UserRole.ADMIN
+        existing_admin.status = UserStatus.ACTIVE
+        AuditRepository.record_activity(
+            db,
+            actor_user_id=existing_admin.id,
+            action="seed.admin.update",
+            entity_type="user",
+            entity_id=str(existing_admin.id),
+            metadata_json={"email": existing_admin.email},
+        )
+        db.commit()
         return
 
     payload = UserCreate(

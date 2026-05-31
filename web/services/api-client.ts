@@ -21,7 +21,9 @@ export async function apiFetch<T>(
 ): Promise<T> {
   const { token, ...fetchOptions } = options;
   const headers = new Headers(fetchOptions.headers);
-  if (!headers.has("Content-Type")) {
+  const isFormData =
+    typeof FormData !== "undefined" && fetchOptions.body instanceof FormData;
+  if (!headers.has("Content-Type") && !isFormData) {
     headers.set("Content-Type", "application/json");
   }
   if (token) {

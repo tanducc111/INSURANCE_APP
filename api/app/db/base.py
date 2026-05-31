@@ -9,6 +9,7 @@ from app.models.customer_management import (
     FollowUpNote,
 )
 from app.models.insurance import InsurancePackage, InsuranceProcess, ProcessStep
+from app.models.rag import Document, DocumentChunk
 from app.models.subscription import CustomerInsuranceSubscription
 from app.models.user import User
 
@@ -23,6 +24,8 @@ __all__ = [
     "Customer",
     "CustomerAssignment",
     "CustomerInsuranceSubscription",
+    "Document",
+    "DocumentChunk",
     "Employee",
     "FollowUpNote",
     "InsurancePackage",

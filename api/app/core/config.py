@@ -23,6 +23,10 @@ class Settings(BaseSettings):
     SEED_ADMIN_EMAIL: str = "admin@insurance.local"
     SEED_ADMIN_PASSWORD: str = "ChangeMe123!"
     SEED_ADMIN_FULL_NAME: str = "System Administrator"
+    EMBEDDING_PROVIDER: str = "local"
+    EMBEDDING_API_KEY: str | None = None
+    RAG_MIN_SCORE: float = 0.08
+    RAG_TOP_K: int = 4
 
     @property
     def cors_origins(self) -> list[str]:
