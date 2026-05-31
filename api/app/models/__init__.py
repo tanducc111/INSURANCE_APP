@@ -8,6 +8,12 @@ from app.models.claim import (
     ClaimPriority,
     ClaimStatus,
 )
+from app.models.communication import (
+    Appointment,
+    AppointmentStatus,
+    ChatMessage,
+    ChatRoom,
+)
 from app.models.customer_management import (
     AssignmentStatus,
     Customer,
@@ -30,7 +36,11 @@ from app.models.user import User, UserRole, UserStatus
 
 __all__ = [
     "ActivityLog",
+    "Appointment",
+    "AppointmentStatus",
     "AssignmentStatus",
+    "ChatMessage",
+    "ChatRoom",
     "Claim",
     "ClaimAttachment",
     "ClaimIncidentType",

@@ -48,6 +48,11 @@ const navigationItems: NavigationItem[] = [
     roles: ["ADMIN"],
   },
   {
+    href: "/dashboard/admin/appointments",
+    label: "Appointments",
+    roles: ["ADMIN"],
+  },
+  {
     href: "/dashboard/admin/insurance/packages",
     label: "Insurance Packages",
     roles: ["ADMIN"],
@@ -68,6 +73,16 @@ const navigationItems: NavigationItem[] = [
     roles: ["EMPLOYEE"],
   },
   {
+    href: "/dashboard/employee/chat",
+    label: "Customer Chat",
+    roles: ["EMPLOYEE"],
+  },
+  {
+    href: "/dashboard/employee/appointments",
+    label: "Appointments",
+    roles: ["EMPLOYEE"],
+  },
+  {
     href: "/dashboard/customer/profile",
     label: "My Profile",
     roles: ["CUSTOMER"],
@@ -85,6 +100,21 @@ const navigationItems: NavigationItem[] = [
   {
     href: "/dashboard/customer/report-incident",
     label: "Report Incident",
+    roles: ["CUSTOMER"],
+  },
+  {
+    href: "/dashboard/customer/chat",
+    label: "Chat",
+    roles: ["CUSTOMER"],
+  },
+  {
+    href: "/dashboard/customer/appointments",
+    label: "My Appointments",
+    roles: ["CUSTOMER"],
+  },
+  {
+    href: "/dashboard/customer/book-appointment",
+    label: "Book Appointment",
     roles: ["CUSTOMER"],
   },
 ];

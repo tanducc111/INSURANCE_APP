@@ -64,6 +64,7 @@ Phase 3 adds the insurance package, process, and process step tables through the
 Phase 4 adds employee, customer, assignment, and follow-up note tables through the latest Alembic migration.
 Phase 5 adds customer insurance subscriptions and dashboard statistics through the latest Alembic migration. The web app now depends on Recharts for dashboard charts, so run `npm install` in `web/` after pulling these changes.
 Phase 6 adds incident and claim report tables, role-protected claim APIs, and claim dashboard statistics through the latest Alembic migration.
+Phase 7 adds customer-employee chat rooms, chat messages, appointments, and role-protected REST polling APIs through the latest Alembic migration.
 
 Create a new migration after model changes:
 
