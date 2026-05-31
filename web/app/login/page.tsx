@@ -11,7 +11,7 @@ import { login } from "@/services/auth-service";
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("admin@insurance.local");
-  const [password, setPassword] = useState("ChangeMe123!");
+  const [password, setPassword] = useState("11111111");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 

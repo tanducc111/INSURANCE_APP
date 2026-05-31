@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     SEED_ADMIN_EMAIL: str = "admin@insurance.local"
-    SEED_ADMIN_PASSWORD: str = "ChangeMe123!"
+    SEED_ADMIN_PASSWORD: str = "11111111"
     SEED_ADMIN_FULL_NAME: str = "System Administrator"
     EMBEDDING_PROVIDER: str = "local"
     EMBEDDING_API_KEY: str | None = None
