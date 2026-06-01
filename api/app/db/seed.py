@@ -35,7 +35,13 @@ from app.models.insurance import (
     InsuranceStatus,
     ProcessStep,
 )
-from app.models.rag import Document, DocumentChunk
+from app.models.rag import (
+    Document,
+    DocumentChunk,
+    RagChatLog,
+    RagEntity,
+    RagRelationship,
+)
 from app.models.subscription import (
     CustomerInsuranceSubscription,
     PaymentStatus,
@@ -47,6 +53,7 @@ from app.repositories.insurance_repository import InsurancePackageRepository
 from app.repositories.user_repository import UserRepository
 from app.schemas.user import UserCreate
 from app.services.rag_service import LocalEmbeddingService, _chunk_text, _tokens
+from app.services.graph_rag_ingestion_service import GraphRagIngestionService
 
 DEFAULT_PASSWORD = "11111111"
 
@@ -229,6 +236,9 @@ def clean_demo_data(db: Session) -> None:
     _delete_all(db, Claim)
     _delete_all(db, CustomerInsuranceSubscription)
     _delete_all(db, CustomerAssignment)
+    _delete_all(db, RagChatLog)
+    _delete_all(db, RagRelationship)
+    _delete_all(db, RagEntity)
     _delete_all(db, DocumentChunk)
     _delete_all(db, Document)
     _delete_all(db, LoginHistory)
@@ -598,16 +608,19 @@ def seed_rag_documents(db: Session, *, admin: User) -> None:
         )
         db.add(document)
         db.flush()
+        chunks: list[DocumentChunk] = []
         for chunk_index, chunk_text in enumerate(_chunk_text(document.raw_text, chunk_size=420, overlap=60)):
-            db.add(
-                DocumentChunk(
-                    document_id=document.id,
-                    chunk_index=chunk_index,
-                    content=chunk_text,
-                    embedding_json=embedding_service.embed(chunk_text),
-                    token_count=len(_tokens(chunk_text)),
-                )
+            chunk = DocumentChunk(
+                document_id=document.id,
+                chunk_index=chunk_index,
+                content=chunk_text,
+                embedding_json=embedding_service.embed(chunk_text),
+                token_count=len(_tokens(chunk_text)),
             )
+            db.add(chunk)
+            chunks.append(chunk)
+        db.flush()
+        GraphRagIngestionService.ingest_chunks(db, chunks=chunks)
     db.flush()
 
 

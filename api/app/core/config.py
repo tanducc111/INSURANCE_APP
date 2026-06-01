@@ -25,8 +25,11 @@ class Settings(BaseSettings):
     SEED_ADMIN_FULL_NAME: str = "System Administrator"
     EMBEDDING_PROVIDER: str = "local"
     EMBEDDING_API_KEY: str | None = None
+    AI_PROVIDER: str = "gemini"
+    GEMINI_API_KEY: str | None = None
+    GEMINI_MODEL: str = "gemini-1.5-flash"
     RAG_MIN_SCORE: float = 0.08
-    RAG_TOP_K: int = 4
+    RAG_TOP_K: int = 5
 
     @property
     def cors_origins(self) -> list[str]:

@@ -207,7 +207,9 @@ export default function AdminDocumentsPage() {
                     >
                       <p className="font-semibold">{document.title}</p>
                       <p className="mt-1 text-xs text-slate-500">
-                        {document.file_name} - {document.chunk_count} chunks
+                        {document.file_name} - {document.chunk_count} đoạn -{" "}
+                        {document.entity_count} thực thể -{" "}
+                        {document.relationship_count} quan hệ
                       </p>
                     </button>
                     <button
@@ -231,7 +233,7 @@ export default function AdminDocumentsPage() {
               <p className="mt-5 text-sm font-medium text-slate-500">Đang tải...</p>
             ) : chunks.length === 0 ? (
               <p className="mt-5 text-sm font-medium text-slate-500">
-                No chunks to preview.
+                Chưa có đoạn tài liệu để xem trước.
               </p>
             ) : (
               <div className="mt-5 space-y-3">
@@ -241,7 +243,7 @@ export default function AdminDocumentsPage() {
                     key={chunk.id}
                   >
                     <p className="text-xs font-semibold uppercase text-slate-500">
-                      Chunk {chunk.chunk_index + 1} - {chunk.token_count} tokens
+                      Đoạn {chunk.chunk_index + 1} - {chunk.token_count} từ khóa
                     </p>
                     <p className="mt-2 text-sm leading-6 text-slate-700">
                       {chunk.content}

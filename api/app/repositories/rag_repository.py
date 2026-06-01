@@ -1,16 +1,42 @@
-from sqlalchemy import Select, func, select
+from sqlalchemy import Select, func, or_, select
 from sqlalchemy.orm import Session, joinedload
 
-from app.models.rag import Document, DocumentChunk
+from app.models.rag import (
+    Document,
+    DocumentChunk,
+    RagChatLog,
+    RagEntity,
+    RagRelationship,
+)
+
+
 def _document_options():
     return (
         joinedload(Document.uploaded_by),
         joinedload(Document.chunks),
+        joinedload(Document.entities),
+        joinedload(Document.relationships),
     )
 
 
 def _chunk_options():
     return (joinedload(DocumentChunk.document),)
+
+
+def _entity_options():
+    return (
+        joinedload(RagEntity.document),
+        joinedload(RagEntity.chunk),
+    )
+
+
+def _relationship_options():
+    return (
+        joinedload(RagRelationship.document),
+        joinedload(RagRelationship.chunk),
+        joinedload(RagRelationship.source_entity),
+        joinedload(RagRelationship.target_entity),
+    )
 
 
 class DocumentRepository:
@@ -119,3 +145,153 @@ class DocumentChunkRepository:
             .limit(limit)
         )
         return list(db.scalars(query))
+
+
+class RagEntityRepository:
+    @staticmethod
+    def create_entity(
+        db: Session,
+        *,
+        document_id: int,
+        chunk_id: int | None,
+        name: str,
+        entity_type: str,
+        description: str,
+    ) -> RagEntity:
+        entity = RagEntity(
+            document_id=document_id,
+            chunk_id=chunk_id,
+            name=name,
+            entity_type=entity_type,
+            description=description,
+        )
+        db.add(entity)
+        return entity
+
+    @staticmethod
+    def list_for_document(db: Session, document_id: int) -> list[RagEntity]:
+        return list(
+            db.scalars(
+                select(RagEntity)
+                .options(*_entity_options())
+                .where(RagEntity.document_id == document_id)
+                .order_by(RagEntity.name.asc())
+            )
+        )
+
+    @staticmethod
+    def search_entities(
+        db: Session,
+        *,
+        keywords: list[str],
+        limit: int = 20,
+    ) -> list[RagEntity]:
+        if not keywords:
+            return []
+        filters = [
+            func.lower(RagEntity.name).like(f"%{keyword.lower()}%")
+            | func.lower(RagEntity.description).like(f"%{keyword.lower()}%")
+            for keyword in keywords
+            if len(keyword) >= 2
+        ]
+        if not filters:
+            return []
+        query = (
+            select(RagEntity)
+            .options(*_entity_options())
+            .where(or_(*filters))
+            .order_by(RagEntity.created_at.desc())
+            .limit(limit)
+        )
+        return list(db.scalars(query).unique())
+
+    @staticmethod
+    def list_by_chunk_ids(db: Session, chunk_ids: list[int]) -> list[RagEntity]:
+        if not chunk_ids:
+            return []
+        return list(
+            db.scalars(
+                select(RagEntity)
+                .options(*_entity_options())
+                .where(RagEntity.chunk_id.in_(chunk_ids))
+                .order_by(RagEntity.name.asc())
+            )
+        )
+
+
+class RagRelationshipRepository:
+    @staticmethod
+    def create_relationship(
+        db: Session,
+        *,
+        source_entity_id: int,
+        target_entity_id: int,
+        relationship_type: str,
+        description: str,
+        document_id: int,
+        chunk_id: int | None,
+    ) -> RagRelationship:
+        relationship = RagRelationship(
+            source_entity_id=source_entity_id,
+            target_entity_id=target_entity_id,
+            relationship_type=relationship_type,
+            description=description,
+            document_id=document_id,
+            chunk_id=chunk_id,
+        )
+        db.add(relationship)
+        return relationship
+
+    @staticmethod
+    def list_for_document(db: Session, document_id: int) -> list[RagRelationship]:
+        return list(
+            db.scalars(
+                select(RagRelationship)
+                .options(*_relationship_options())
+                .where(RagRelationship.document_id == document_id)
+                .order_by(RagRelationship.created_at.desc())
+            )
+        )
+
+    @staticmethod
+    def list_connected(
+        db: Session,
+        *,
+        entity_ids: list[int],
+        limit: int = 50,
+    ) -> list[RagRelationship]:
+        if not entity_ids:
+            return []
+        query = (
+            select(RagRelationship)
+            .options(*_relationship_options())
+            .where(
+                (RagRelationship.source_entity_id.in_(entity_ids))
+                | (RagRelationship.target_entity_id.in_(entity_ids))
+            )
+            .order_by(RagRelationship.created_at.desc())
+            .limit(limit)
+        )
+        return list(db.scalars(query).unique())
+
+
+class RagChatLogRepository:
+    @staticmethod
+    def create_log(
+        db: Session,
+        *,
+        user_id: int | None,
+        question: str,
+        answer: str,
+        retrieved_context_json: dict,
+        confidence_score: float,
+    ) -> RagChatLog:
+        log = RagChatLog(
+            user_id=user_id,
+            question=question,
+            answer=answer,
+            retrieved_context_json=retrieved_context_json,
+            confidence_score=confidence_score,
+        )
+        db.add(log)
+        return log

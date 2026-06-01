@@ -4,6 +4,8 @@ export type DocumentRecord = {
   file_name: string;
   content_type: string;
   chunk_count: number;
+  entity_count: number;
+  relationship_count: number;
   uploaded_by_user_id: number | null;
   uploaded_by_name: string | null;
   created_at: string;
@@ -33,4 +35,12 @@ export type ChatbotSource = {
 export type ChatbotAnswer = {
   answer: string;
   sources: ChatbotSource[];
+  confidence_score: number;
+  matched_entities?: {
+    id: number;
+    name: string;
+    entity_type: string;
+    description: string;
+  }[];
+  fallback_reason?: string | null;
 };

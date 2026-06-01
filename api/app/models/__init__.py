@@ -27,7 +27,7 @@ from app.models.insurance import (
     InsuranceStatus,
     ProcessStep,
 )
-from app.models.rag import Document, DocumentChunk
+from app.models.rag import Document, DocumentChunk, RagChatLog, RagEntity, RagRelationship
 from app.models.subscription import (
     CustomerInsuranceSubscription,
     PaymentStatus,
@@ -60,6 +60,9 @@ __all__ = [
     "LoginHistory",
     "PaymentStatus",
     "ProcessStep",
+    "RagChatLog",
+    "RagEntity",
+    "RagRelationship",
     "SubscriptionStatus",
     "User",
     "UserRole",

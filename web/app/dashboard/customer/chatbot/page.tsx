@@ -16,12 +16,15 @@ type ChatEntry = {
   question: string;
   answer: string;
   sources: ChatbotSource[];
+  confidenceScore: number;
+  fallbackReason?: string | null;
 };
 
 const suggestedQuestions = [
-  "Processes nộp hồ sơ bồi thường gồm những bước nào?",
-  "Bảo hiểm sức khỏe chi trả những quyền lợi nào?",
-  "Tôi cần chuẩn bị giấy tờ gì khi yêu cầu bồi thường?",
+  "Gói bảo hiểm sức khỏe có quyền lợi gì?",
+  "Tôi cần chuẩn bị giấy tờ gì để nộp hồ sơ bồi thường?",
+  "Bảo hiểm xe máy có hỗ trợ tai nạn không?",
+  "Thời gian xử lý hồ sơ bồi thường là bao lâu?",
 ];
 
 export default function CustomerChatbotPage() {
@@ -49,6 +52,8 @@ export default function CustomerChatbotPage() {
           id: Date.now(),
           question: currentQuestion,
           sources: response.sources,
+          confidenceScore: response.confidence_score,
+          fallbackReason: response.fallback_reason,
         },
       ]);
     } catch (err) {
@@ -74,7 +79,7 @@ export default function CustomerChatbotPage() {
   return (
     <div className="mx-auto max-w-5xl">
       <PageHeader
-        description="Trợ lý chỉ trả lời dựa trên tài liệu công ty đã được quản trị viên tải lên."
+        description="Tôi chỉ trả lời dựa trên tài liệu nội bộ của công ty."
         eyebrow="Khách hàng"
         title="Trợ lý bảo hiểm AI"
       />
@@ -124,6 +129,11 @@ export default function CustomerChatbotPage() {
                   <p className="whitespace-pre-line text-sm leading-6 text-slate-700">
                     {entry.answer}
                   </p>
+                  {entry.fallbackReason ? (
+                    <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
+                      Thông tin này chưa có trong tài liệu nội bộ. Bạn có thể liên hệ nhân viên phụ trách để được hỗ trợ thêm.
+                    </p>
+                  ) : null}
                   {entry.sources.length > 0 ? (
                     <div className="mt-4 border-t border-border pt-4">
                       <p className="text-xs font-bold uppercase tracking-normal text-muted">
@@ -140,8 +150,7 @@ export default function CustomerChatbotPage() {
                               {source.document_title}
                             </p>
                             <p className="mt-1 text-xs text-muted">
-                              Đoạn {source.chunk_index + 1} - điểm liên quan{" "}
-                              {source.score}
+                              Đoạn {source.chunk_index + 1}
                             </p>
                             <p className="mt-2 text-sm leading-6 text-slate-600">
                               {source.preview}
@@ -169,7 +178,7 @@ export default function CustomerChatbotPage() {
           <input
             className="flex-1 rounded-md border border-border px-3 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-blue-100"
             onChange={(event) => setQuestion(event.target.value)}
-            placeholder="Nhập câu hỏi từ tài liệu công ty"
+            placeholder="Nhập câu hỏi về quyền lợi, hồ sơ bồi thường hoặc hợp đồng"
             value={question}
           />
           <button

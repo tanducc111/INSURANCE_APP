@@ -34,8 +34,11 @@ services:
       SEED_ADMIN_FULL_NAME: ${SEED_ADMIN_FULL_NAME:-System Administrator}
       EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-local}
       EMBEDDING_API_KEY: ${EMBEDDING_API_KEY:-}
+      AI_PROVIDER: ${AI_PROVIDER:-gemini}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-1.5-flash}
       RAG_MIN_SCORE: ${RAG_MIN_SCORE:-0.08}
-      RAG_TOP_K: ${RAG_TOP_K:-4}
+      RAG_TOP_K: ${RAG_TOP_K:-5}
     depends_on:
       postgres:
         condition: service_healthy

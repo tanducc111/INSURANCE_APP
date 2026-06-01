@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey, Integer, JSON, String, Text
+from sqlalchemy import Float, ForeignKey, Integer, JSON, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, IDMixin, TimestampMixin
@@ -23,10 +23,30 @@ class Document(IDMixin, TimestampMixin, Base):
         back_populates="document",
         cascade="all, delete-orphan",
     )
+    entities = relationship(
+        "RagEntity",
+        back_populates="document",
+        cascade="all, delete-orphan",
+        foreign_keys="RagEntity.document_id",
+    )
+    relationships = relationship(
+        "RagRelationship",
+        back_populates="document",
+        cascade="all, delete-orphan",
+        foreign_keys="RagRelationship.document_id",
+    )
 
     @property
     def chunk_count(self) -> int:
         return len(self.chunks)
+
+    @property
+    def entity_count(self) -> int:
+        return len(self.entities)
+
+    @property
+    def relationship_count(self) -> int:
+        return len(self.relationships)
 
     @property
     def uploaded_by_name(self) -> str | None:
@@ -46,7 +66,124 @@ class DocumentChunk(IDMixin, TimestampMixin, Base):
     token_count: Mapped[int] = mapped_column(Integer, nullable=False)
 
     document = relationship("Document", back_populates="chunks")
+    entities = relationship(
+        "RagEntity",
+        back_populates="chunk",
+        cascade="all, delete-orphan",
+        foreign_keys="RagEntity.chunk_id",
+    )
+    relationships = relationship(
+        "RagRelationship",
+        back_populates="chunk",
+        cascade="all, delete-orphan",
+        foreign_keys="RagRelationship.chunk_id",
+    )
 
     @property
     def document_title(self) -> str:
         return self.document.title
+
+
+class RagEntity(IDMixin, TimestampMixin, Base):
+    __tablename__ = "rag_entities"
+
+    document_id: Mapped[int] = mapped_column(
+        ForeignKey("documents.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    chunk_id: Mapped[int | None] = mapped_column(
+        ForeignKey("document_chunks.id", ondelete="CASCADE"),
+        nullable=True,
+        index=True,
+    )
+    name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    entity_type: Mapped[str] = mapped_column(String(80), nullable=False, index=True)
+    description: Mapped[str] = mapped_column(Text, nullable=False, default="")
+
+    document = relationship(
+        "Document",
+        back_populates="entities",
+        foreign_keys=[document_id],
+    )
+    chunk = relationship(
+        "DocumentChunk",
+        back_populates="entities",
+        foreign_keys=[chunk_id],
+    )
+    source_relationships = relationship(
+        "RagRelationship",
+        back_populates="source_entity",
+        cascade="all, delete-orphan",
+        foreign_keys="RagRelationship.source_entity_id",
+    )
+    target_relationships = relationship(
+        "RagRelationship",
+        back_populates="target_entity",
+        cascade="all, delete-orphan",
+        foreign_keys="RagRelationship.target_entity_id",
+    )
+
+
+class RagRelationship(IDMixin, TimestampMixin, Base):
+    __tablename__ = "rag_relationships"
+
+    source_entity_id: Mapped[int] = mapped_column(
+        ForeignKey("rag_entities.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    target_entity_id: Mapped[int] = mapped_column(
+        ForeignKey("rag_entities.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    relationship_type: Mapped[str] = mapped_column(String(80), nullable=False, index=True)
+    description: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    document_id: Mapped[int] = mapped_column(
+        ForeignKey("documents.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    chunk_id: Mapped[int | None] = mapped_column(
+        ForeignKey("document_chunks.id", ondelete="CASCADE"),
+        nullable=True,
+        index=True,
+    )
+
+    source_entity = relationship(
+        "RagEntity",
+        back_populates="source_relationships",
+        foreign_keys=[source_entity_id],
+    )
+    target_entity = relationship(
+        "RagEntity",
+        back_populates="target_relationships",
+        foreign_keys=[target_entity_id],
+    )
+    document = relationship(
+        "Document",
+        back_populates="relationships",
+        foreign_keys=[document_id],
+    )
+    chunk = relationship(
+        "DocumentChunk",
+        back_populates="relationships",
+        foreign_keys=[chunk_id],
+    )
+
+
+class RagChatLog(IDMixin, TimestampMixin, Base):
+    __tablename__ = "rag_chat_logs"
+
+    user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    question: Mapped[str] = mapped_column(Text, nullable=False)
+    answer: Mapped[str] = mapped_column(Text, nullable=False)
+    retrieved_context_json: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
+    confidence_score: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+
+    user = relationship("User")
