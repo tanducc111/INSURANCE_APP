@@ -57,6 +57,18 @@ docker compose exec api alembic upgrade head
 docker compose exec api python -m app.db.seed
 ```
 
+Clean existing demo data while keeping the admin account:
+
+```powershell
+docker compose exec api python -m app.db.seed --clean
+```
+
+Clean and generate a fresh demo dataset:
+
+```powershell
+docker compose exec api python -m app.db.seed --reseed
+```
+
 Open:
 
 - Web: http://localhost:3000
@@ -70,18 +82,24 @@ The seed command is idempotent and resets these demo passwords on each run:
 | Role | Email | Password |
 | --- | --- | --- |
 | Admin | `admin@insurance.local` | value of `SEED_ADMIN_PASSWORD` in `.env` |
-| Employee | `employee@insurance.local` | `11111111` |
-| Customer | `customer@insurance.local` | `11111111` |
+| Employee | `nguyen.van.an@insurance.local` | `11111111` |
+| Customer | `customer001@customer.insurance.local` | `11111111` |
 
 With the checked-in `.env.example`, the admin password is `11111111`.
 
-Seed also creates:
+Seed also creates a realistic Vietnamese dataset:
 
-- Demo employee profile
-- Demo customer profile
-- Demo insurance package
-- Demo customer assignment
-- Demo active subscription
+- 15 employees across Customer Service, Claims Processing, Insurance Sales, Health Insurance, and Vehicle Insurance
+- 80 customers from Da Nang, Ho Chi Minh City, Hanoi, Can Tho, and Hue
+- 12 insurance packages with process templates and approval steps
+- 80 active customer assignments
+- 120 subscriptions with active, pending, expired, and cancelled statuses
+- 60 claim reports with mixed incident types and statuses
+- 40 appointments with pending, accepted, rejected, and completed statuses
+- 80 chat rooms and 240 chat messages
+- Follow-up notes, login history, activity logs, and RAG company documents with chunks
+
+The `--clean` mode removes demo-related rows from chat, appointments, follow-up notes, claims, subscriptions, assignments, RAG documents, login history, activity logs, customers, employees, and employee/customer user accounts. It does not delete the admin account or database schema.
 
 ## Backend Local Development
 
@@ -93,6 +111,7 @@ pip install -r requirements.txt
 $env:DATABASE_URL = "postgresql+psycopg://insurance_user:insurance_password@localhost:5432/insurance_app"
 alembic upgrade head
 python -m app.db.seed
+python -m app.db.seed --reseed
 uvicorn app.main:app --reload
 ```
 

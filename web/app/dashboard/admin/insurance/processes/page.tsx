@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
+import { StatusBadge } from "@/components/ui/status-badge";
 import { useAdminAccess } from "@/hooks/use-admin-access";
 import { ApiError } from "@/services/api-client";
 import {
@@ -93,7 +94,7 @@ export default function AdminInsuranceProcessesPage() {
         return processData[0]?.id ?? null;
       });
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to load processes");
+      setError(err instanceof ApiError ? err.message : "Không thể tải quy trình bảo hiểm");
     } finally {
       setIsLoading(false);
     }
@@ -110,7 +111,7 @@ export default function AdminInsuranceProcessesPage() {
       const data = await listSteps(token, processId, { limit: 100 });
       setSteps(data);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to load steps");
+      setError(err instanceof ApiError ? err.message : "Không thể tải bước xử lý");
     } finally {
       setIsStepLoading(false);
     }
@@ -161,7 +162,7 @@ export default function AdminInsuranceProcessesPage() {
       });
       await loadProcesses();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to save process");
+      setError(err instanceof ApiError ? err.message : "Không thể lưu quy trình bảo hiểm");
     }
   }
 
@@ -176,7 +177,7 @@ export default function AdminInsuranceProcessesPage() {
   }
 
   async function handleDeleteProcess(processId: number) {
-    if (!token || !window.confirm("Delete this process?")) {
+    if (!token || !window.confirm("Xóa quy trình này?")) {
       return;
     }
     await deleteProcess(token, processId);
@@ -209,7 +210,7 @@ export default function AdminInsuranceProcessesPage() {
       });
       await loadSteps(selectedProcessId);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to save step");
+      setError(err instanceof ApiError ? err.message : "Không thể lưu bước xử lý");
     }
   }
 
@@ -224,7 +225,7 @@ export default function AdminInsuranceProcessesPage() {
   }
 
   async function handleDeleteStep(stepId: number) {
-    if (!token || !selectedProcessId || !window.confirm("Delete this step?")) {
+    if (!token || !selectedProcessId || !window.confirm("Xóa bước này?")) {
       return;
     }
     await deleteStep(token, stepId);
@@ -232,14 +233,14 @@ export default function AdminInsuranceProcessesPage() {
   }
 
   if (!isReady) {
-    return <p className="text-sm font-medium text-slate-600">Loading...</p>;
+    return <p className="text-sm font-medium text-slate-600">Đang tải...</p>;
   }
 
   return (
     <div className="mx-auto max-w-7xl">
       <header className="border-b border-slate-200 pb-5">
-        <p className="text-sm font-medium uppercase text-ocean">Admin</p>
-        <h1 className="mt-2 text-3xl font-semibold">Insurance Processes</h1>
+        <p className="text-sm font-medium uppercase text-ocean">Quản trị</p>
+        <h1 className="mt-2 text-3xl font-semibold">Quy trình bảo hiểm</h1>
       </header>
 
       {error ? (
@@ -255,7 +256,7 @@ export default function AdminInsuranceProcessesPage() {
             onSubmit={handleProcessSubmit}
           >
             <h2 className="text-lg font-semibold">
-              {editingProcessId ? "Edit Process" : "Create Process"}
+              {editingProcessId ? "Chỉnh sửa quy trình" : "Tạo quy trình"}
             </h2>
             <div className="mt-5 grid gap-4">
               <select
@@ -271,7 +272,7 @@ export default function AdminInsuranceProcessesPage() {
                 value={processForm.package_id}
               >
                 {packages.length === 0 ? (
-                  <option value={0}>No packages</option>
+                <option value={0}>Chưa có gói bảo hiểm</option>
                 ) : (
                   packages.map((packageItem) => (
                     <option key={packageItem.id} value={packageItem.id}>
@@ -297,7 +298,7 @@ export default function AdminInsuranceProcessesPage() {
                     description: event.target.value,
                   })
                 }
-                placeholder="Description"
+                placeholder="Mô tả"
                 value={processForm.description ?? ""}
               />
               <select
@@ -310,17 +311,15 @@ export default function AdminInsuranceProcessesPage() {
                 }
                 value={processForm.status}
               >
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
+                <option value="active">Đang hoạt động</option>
+                <option value="inactive">Ngừng hoạt động</option>
               </select>
               <div className="flex gap-3">
                 <button
                   className="rounded-md bg-ocean px-4 py-2 text-sm font-semibold text-white disabled:bg-slate-300"
                   disabled={packages.length === 0}
                   type="submit"
-                >
-                  Save
-                </button>
+                >Lưu</button>
                 {editingProcessId ? (
                   <button
                     className="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold"
@@ -332,9 +331,7 @@ export default function AdminInsuranceProcessesPage() {
                       });
                     }}
                     type="button"
-                  >
-                    Cancel
-                  </button>
+                  >Hủy</button>
                 ) : null}
               </div>
             </div>
@@ -345,7 +342,7 @@ export default function AdminInsuranceProcessesPage() {
             onSubmit={handleStepSubmit}
           >
             <h2 className="text-lg font-semibold">
-              {editingStepId ? "Edit Step" : "Add Step"}
+              {editingStepId ? "Chỉnh sửa bước" : "Thêm bước"}
             </h2>
             <div className="mt-5 grid gap-4">
               <input
@@ -376,7 +373,7 @@ export default function AdminInsuranceProcessesPage() {
                 onChange={(event) =>
                   setStepForm({ ...stepForm, description: event.target.value })
                 }
-                placeholder="Description"
+                placeholder="Mô tả"
                 value={stepForm.description ?? ""}
               />
               <select
@@ -392,18 +389,16 @@ export default function AdminInsuranceProcessesPage() {
                 value={stepForm.required_role ?? ""}
               >
                 <option value="">Any role</option>
-                <option value="ADMIN">Admin</option>
-                <option value="EMPLOYEE">Employee</option>
-                <option value="CUSTOMER">Customer</option>
+                <option value="ADMIN">Quản trị</option>
+                <option value="EMPLOYEE">Nhân viên</option>
+                <option value="CUSTOMER">Khách hàng</option>
               </select>
               <div className="flex gap-3">
                 <button
                   className="rounded-md bg-ocean px-4 py-2 text-sm font-semibold text-white disabled:bg-slate-300"
                   disabled={!selectedProcessId}
                   type="submit"
-                >
-                  Save
-                </button>
+                >Lưu</button>
                 {editingStepId ? (
                   <button
                     className="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold"
@@ -412,9 +407,7 @@ export default function AdminInsuranceProcessesPage() {
                       setStepForm(emptyStepForm);
                     }}
                     type="button"
-                  >
-                    Cancel
-                  </button>
+                  >Hủy</button>
                 ) : null}
               </div>
             </div>
@@ -426,7 +419,7 @@ export default function AdminInsuranceProcessesPage() {
             <input
               className="min-w-64 flex-1 rounded-md border border-slate-300 px-3 py-2"
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search processes"
+              placeholder="Tìm kiếm quy trình"
               value={search}
             />
             <select
@@ -436,27 +429,25 @@ export default function AdminInsuranceProcessesPage() {
               }
               value={statusFilter}
             >
-              <option value="all">All statuses</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
+              <option value="all">Tất cả trạng thái</option>
+              <option value="active">Đang hoạt động</option>
+              <option value="inactive">Ngừng hoạt động</option>
             </select>
             <button
               className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold"
               type="submit"
-            >
-              Search
-            </button>
+            >Tìm kiếm</button>
           </form>
 
           <div className="mt-5 grid gap-6 lg:grid-cols-[1fr_360px]">
             <div className="overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm">
               {isLoading ? (
                 <p className="p-5 text-sm font-medium text-slate-500">
-                  Loading...
+                  Đang tải...
                 </p>
               ) : processes.length === 0 ? (
                 <p className="p-5 text-sm font-medium text-slate-500">
-                  No processes found.
+                  Chưa có quy trình.
                 </p>
               ) : (
                 <div className="divide-y divide-slate-200">
@@ -482,7 +473,7 @@ export default function AdminInsuranceProcessesPage() {
                             </p>
                           </div>
                           <p className="text-sm font-semibold capitalize text-ocean">
-                            {process.status}
+                            <StatusBadge value={process.status} />
                           </p>
                         </div>
                       </button>
@@ -491,15 +482,13 @@ export default function AdminInsuranceProcessesPage() {
                           className="rounded-md border border-slate-300 px-3 py-1 text-xs font-semibold"
                           onClick={() => handleEditProcess(process)}
                           type="button"
-                        >
-                          Edit
-                        </button>
+                        >Chỉnh sửa</button>
                         <button
                           className="rounded-md border border-red-300 px-3 py-1 text-xs font-semibold text-red-700"
                           onClick={() => void handleDeleteProcess(process.id)}
                           type="button"
                         >
-                          Delete
+                          Xóa
                         </button>
                       </div>
                     </div>
@@ -514,11 +503,11 @@ export default function AdminInsuranceProcessesPage() {
               </h2>
               {isStepLoading ? (
                 <p className="mt-5 text-sm font-medium text-slate-500">
-                  Loading...
+                  Đang tải...
                 </p>
               ) : steps.length === 0 ? (
                 <p className="mt-5 text-sm font-medium text-slate-500">
-                  No steps found.
+                  Chưa có bước xử lý.
                 </p>
               ) : (
                 <div className="mt-5 space-y-3">
@@ -547,15 +536,13 @@ export default function AdminInsuranceProcessesPage() {
                           className="rounded-md border border-slate-300 px-3 py-1 text-xs font-semibold"
                           onClick={() => handleEditStep(step)}
                           type="button"
-                        >
-                          Edit
-                        </button>
+                        >Chỉnh sửa</button>
                         <button
                           className="rounded-md border border-red-300 px-3 py-1 text-xs font-semibold text-red-700"
                           onClick={() => void handleDeleteStep(step.id)}
                           type="button"
                         >
-                          Delete
+                          Xóa
                         </button>
                       </div>
                     </div>

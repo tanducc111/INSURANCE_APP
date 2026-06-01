@@ -3,6 +3,10 @@
 import { FormEvent, useEffect, useState } from "react";
 
 import { useAdminAccess } from "@/hooks/use-admin-access";
+import {
+  getPaymentStatusLabel,
+  getSubscriptionStatusLabel,
+} from "@/lib/vi-labels";
 import { ApiError } from "@/services/api-client";
 import {
   listCustomers,
@@ -80,7 +84,7 @@ export default function AdminSubscriptionsPage() {
       }));
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Unable to load subscriptions",
+        err instanceof ApiError ? err.message : "Không thể tải hợp đồng bảo hiểm",
       );
     } finally {
       setIsLoading(false);
@@ -125,7 +129,7 @@ export default function AdminSubscriptionsPage() {
       await loadData();
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Unable to save subscription",
+        err instanceof ApiError ? err.message : "Không thể lưu hợp đồng bảo hiểm",
       );
     } finally {
       setIsSaving(false);
@@ -147,14 +151,14 @@ export default function AdminSubscriptionsPage() {
   }
 
   if (!isReady) {
-    return <p className="text-sm font-medium text-slate-600">Loading...</p>;
+    return <p className="text-sm font-medium text-slate-600">Đang tải...</p>;
   }
 
   return (
     <div className="mx-auto max-w-7xl">
       <header className="border-b border-slate-200 pb-5">
-        <p className="text-sm font-medium uppercase text-ocean">Admin</p>
-        <h1 className="mt-2 text-3xl font-semibold">Subscriptions</h1>
+        <p className="text-sm font-medium uppercase text-ocean">Quản trị</p>
+        <h1 className="mt-2 text-3xl font-semibold">Hợp đồng bảo hiểm</h1>
       </header>
 
       {error ? (
@@ -169,7 +173,7 @@ export default function AdminSubscriptionsPage() {
           onSubmit={handleSubmit}
         >
           <h2 className="text-lg font-semibold">
-            {editingId ? "Edit Subscription" : "Create Subscription"}
+            {editingId ? "Chỉnh sửa hợp đồng bảo hiểm" : "Tạo hợp đồng bảo hiểm"}
           </h2>
           <div className="mt-5 grid gap-4">
             <select
@@ -181,7 +185,7 @@ export default function AdminSubscriptionsPage() {
               value={form.customer_id}
             >
               {customers.length === 0 ? (
-                <option value={0}>No customers</option>
+                <option value={0}>Chưa có khách hàng</option>
               ) : (
                 customers.map((customer) => (
                   <option key={customer.id} value={customer.id}>
@@ -200,7 +204,7 @@ export default function AdminSubscriptionsPage() {
               value={form.package_id}
             >
               {packages.length === 0 ? (
-                <option value={0}>No packages</option>
+                <option value={0}>Chưa có gói bảo hiểm</option>
               ) : (
                 packages.map((packageItem) => (
                   <option key={packageItem.id} value={packageItem.id}>
@@ -215,7 +219,7 @@ export default function AdminSubscriptionsPage() {
               onChange={(event) =>
                 setForm({ ...form, policy_number: event.target.value })
               }
-              placeholder="Policy number"
+              placeholder="Số hợp đồng bảo hiểm"
               required
               value={form.policy_number}
             />
@@ -252,10 +256,10 @@ export default function AdminSubscriptionsPage() {
                 }
                 value={form.status}
               >
-                <option value="pending">Pending</option>
-                <option value="active">Active</option>
-                <option value="expired">Expired</option>
-                <option value="cancelled">Cancelled</option>
+                <option value="pending">Chờ kích hoạt</option>
+                <option value="active">Đang hiệu lực</option>
+                <option value="expired">Hết hạn</option>
+                <option value="cancelled">Đã hủy</option>
               </select>
               <select
                 className="rounded-md border border-slate-300 px-3 py-2"
@@ -267,9 +271,9 @@ export default function AdminSubscriptionsPage() {
                 }
                 value={form.payment_status}
               >
-                <option value="unpaid">Unpaid</option>
-                <option value="paid">Paid</option>
-                <option value="overdue">Overdue</option>
+                <option value="unpaid">Chưa thanh toán</option>
+                <option value="paid">Đã thanh toán</option>
+                <option value="overdue">Quá hạn</option>
               </select>
             </div>
 
@@ -279,7 +283,7 @@ export default function AdminSubscriptionsPage() {
               onChange={(event) =>
                 setForm({ ...form, premium_amount: event.target.value })
               }
-              placeholder="Premium amount"
+              placeholder="Số tiền phí bảo hiểm"
               required
               step="0.01"
               type="number"
@@ -292,7 +296,7 @@ export default function AdminSubscriptionsPage() {
                 disabled={isSaving || customers.length === 0 || packages.length === 0}
                 type="submit"
               >
-                {isSaving ? "Saving..." : "Save"}
+                {isSaving ? "Đang lưu..." : "Lưu"}
               </button>
               {editingId ? (
                 <button
@@ -306,9 +310,7 @@ export default function AdminSubscriptionsPage() {
                     });
                   }}
                   type="button"
-                >
-                  Cancel
-                </button>
+                >Hủy</button>
               ) : null}
             </div>
           </div>
@@ -319,7 +321,7 @@ export default function AdminSubscriptionsPage() {
             <input
               className="min-w-64 flex-1 rounded-md border border-slate-300 px-3 py-2"
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search policy, customer, package"
+              placeholder="Tìm kiếm hợp đồng, khách hàng, gói bảo hiểm"
               value={search}
             />
             <select
@@ -329,11 +331,11 @@ export default function AdminSubscriptionsPage() {
               }
               value={statusFilter}
             >
-              <option value="all">All statuses</option>
-              <option value="pending">Pending</option>
-              <option value="active">Active</option>
-              <option value="expired">Expired</option>
-              <option value="cancelled">Cancelled</option>
+              <option value="all">Tất cả trạng thái</option>
+              <option value="pending">Chờ kích hoạt</option>
+              <option value="active">Đang hiệu lực</option>
+              <option value="expired">Hết hạn</option>
+              <option value="cancelled">Đã hủy</option>
             </select>
             <select
               className="rounded-md border border-slate-300 px-3 py-2"
@@ -342,37 +344,35 @@ export default function AdminSubscriptionsPage() {
               }
               value={paymentFilter}
             >
-              <option value="all">All payments</option>
-              <option value="unpaid">Unpaid</option>
-              <option value="paid">Paid</option>
-              <option value="overdue">Overdue</option>
+              <option value="all">Tất cả thanh toán</option>
+              <option value="unpaid">Chưa thanh toán</option>
+              <option value="paid">Đã thanh toán</option>
+              <option value="overdue">Quá hạn</option>
             </select>
             <button
               className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold"
               type="submit"
-            >
-              Search
-            </button>
+            >Tìm kiếm</button>
           </form>
 
           <div className="mt-5 overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm">
             {isLoading ? (
-              <p className="p-5 text-sm font-medium text-slate-500">Loading...</p>
+              <p className="p-5 text-sm font-medium text-slate-500">Đang tải...</p>
             ) : subscriptions.length === 0 ? (
               <p className="p-5 text-sm font-medium text-slate-500">
-                No subscriptions found.
+                Chưa có hợp đồng bảo hiểm.
               </p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[900px] text-left text-sm">
                   <thead className="bg-slate-50 text-xs uppercase text-slate-500">
                     <tr>
-                      <th className="px-4 py-3">Policy</th>
-                      <th className="px-4 py-3">Customer</th>
-                      <th className="px-4 py-3">Package</th>
-                      <th className="px-4 py-3">Status</th>
-                      <th className="px-4 py-3">Payment</th>
-                      <th className="px-4 py-3">Actions</th>
+                      <th className="px-4 py-3">Hợp đồng</th>
+                      <th className="px-4 py-3">Khách hàng</th>
+                      <th className="px-4 py-3">Gói bảo hiểm</th>
+                      <th className="px-4 py-3">Trạng thái</th>
+                      <th className="px-4 py-3">Thanh toán</th>
+                      <th className="px-4 py-3">Thao tác</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200">
@@ -383,7 +383,7 @@ export default function AdminSubscriptionsPage() {
                             {subscription.policy_number}
                           </p>
                           <p className="text-xs text-slate-500">
-                            {subscription.start_date} to {subscription.end_date}
+                            {subscription.start_date} đến {subscription.end_date}
                           </p>
                         </td>
                         <td className="px-4 py-3">
@@ -393,19 +393,17 @@ export default function AdminSubscriptionsPage() {
                           {subscription.package_name}
                         </td>
                         <td className="px-4 py-3 capitalize">
-                          {subscription.status}
+                          {getSubscriptionStatusLabel(subscription.status)}
                         </td>
                         <td className="px-4 py-3 capitalize">
-                          {subscription.payment_status}
+                          {getPaymentStatusLabel(subscription.payment_status)}
                         </td>
                         <td className="px-4 py-3">
                           <button
                             className="rounded-md border border-slate-300 px-3 py-1 text-xs font-semibold"
                             onClick={() => handleEdit(subscription)}
                             type="button"
-                          >
-                            Edit
-                          </button>
+                          >Chỉnh sửa</button>
                         </td>
                       </tr>
                     ))}

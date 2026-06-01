@@ -37,7 +37,7 @@ export default function CustomerBookAppointmentPage() {
       router.push("/dashboard/customer/appointments");
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Unable to book appointment",
+        err instanceof ApiError ? err.message : "Không thể đặt lịch hẹn",
       );
     } finally {
       setIsSaving(false);
@@ -45,14 +45,14 @@ export default function CustomerBookAppointmentPage() {
   }
 
   if (!isReady) {
-    return <p className="text-sm font-medium text-slate-600">Loading...</p>;
+    return <p className="text-sm font-medium text-slate-600">Đang tải...</p>;
   }
 
   return (
     <div className="mx-auto max-w-3xl">
       <header className="border-b border-slate-200 pb-5">
-        <p className="text-sm font-medium uppercase text-ocean">Customer</p>
-        <h1 className="mt-2 text-3xl font-semibold">Book Appointment</h1>
+        <p className="text-sm font-medium uppercase text-ocean">Khách hàng</p>
+        <h1 className="mt-2 text-3xl font-semibold">Đặt lịch hẹn</h1>
       </header>
 
       {error ? (
@@ -92,7 +92,7 @@ export default function CustomerBookAppointmentPage() {
           <textarea
             className="min-h-28 rounded-md border border-slate-300 px-3 py-2"
             onChange={(event) => setForm({ ...form, note: event.target.value })}
-            placeholder="Appointment note"
+              placeholder="Ghi chú lịch hẹn"
             value={form.note ?? ""}
           />
           <button
@@ -100,7 +100,7 @@ export default function CustomerBookAppointmentPage() {
             disabled={isSaving}
             type="submit"
           >
-            {isSaving ? "Booking..." : "Book Appointment"}
+            {isSaving ? "Booking..." : "Đặt lịch hẹn"}
           </button>
         </div>
       </form>

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 
+import { StatusBadge } from "@/components/ui/status-badge";
 import { useAdminAccess } from "@/hooks/use-admin-access";
 import { ApiError } from "@/services/api-client";
 import {
@@ -54,7 +55,7 @@ export default function AdminInsurancePackagesPage() {
       });
       setPackages(data);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to load packages");
+      setError(err instanceof ApiError ? err.message : "Không thể tải gói bảo hiểm");
     } finally {
       setIsLoading(false);
     }
@@ -95,7 +96,7 @@ export default function AdminInsurancePackagesPage() {
       setEditingId(null);
       await loadPackages();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to save package");
+      setError(err instanceof ApiError ? err.message : "Không thể lưu gói bảo hiểm");
     } finally {
       setIsSaving(false);
     }
@@ -124,7 +125,7 @@ export default function AdminInsurancePackagesPage() {
   }
 
   async function handleDelete(packageId: number) {
-    if (!token || !window.confirm("Delete this package?")) {
+    if (!token || !window.confirm("Xóa gói bảo hiểm này?")) {
       return;
     }
     await deletePackage(token, packageId);
@@ -132,14 +133,14 @@ export default function AdminInsurancePackagesPage() {
   }
 
   if (!isReady) {
-    return <p className="text-sm font-medium text-slate-600">Loading...</p>;
+    return <p className="text-sm font-medium text-slate-600">Đang tải...</p>;
   }
 
   return (
     <div className="mx-auto max-w-7xl">
       <header className="border-b border-slate-200 pb-5">
-        <p className="text-sm font-medium uppercase text-ocean">Admin</p>
-        <h1 className="mt-2 text-3xl font-semibold">Insurance Packages</h1>
+        <p className="text-sm font-medium uppercase text-ocean">Quản trị</p>
+        <h1 className="mt-2 text-3xl font-semibold">Gói bảo hiểm</h1>
       </header>
 
       {error ? (
@@ -154,7 +155,7 @@ export default function AdminInsurancePackagesPage() {
           onSubmit={handleSubmit}
         >
           <h2 className="text-lg font-semibold">
-            {editingId ? "Edit Package" : "Create Package"}
+            {editingId ? "Chỉnh sửa gói bảo hiểm" : "Tạo gói bảo hiểm"}
           </h2>
           <div className="mt-5 grid gap-4">
             <input
@@ -167,7 +168,7 @@ export default function AdminInsurancePackagesPage() {
             <input
               className="rounded-md border border-slate-300 px-3 py-2"
               onChange={(event) => setForm({ ...form, name: event.target.value })}
-              placeholder="Name"
+              placeholder="Tên"
               required
               value={form.name}
             />
@@ -176,7 +177,7 @@ export default function AdminInsurancePackagesPage() {
               onChange={(event) =>
                 setForm({ ...form, package_type: event.target.value })
               }
-              placeholder="Type"
+              placeholder="Loại"
               required
               value={form.package_type}
             />
@@ -185,7 +186,7 @@ export default function AdminInsurancePackagesPage() {
               onChange={(event) =>
                 setForm({ ...form, description: event.target.value })
               }
-              placeholder="Description"
+              placeholder="Mô tả"
               value={form.description ?? ""}
             />
             <div className="grid gap-4 sm:grid-cols-2">
@@ -195,7 +196,7 @@ export default function AdminInsurancePackagesPage() {
                 onChange={(event) =>
                   setForm({ ...form, premium_amount: event.target.value })
                 }
-                placeholder="Premium"
+                placeholder="Phí bảo hiểm"
                 required
                 step="0.01"
                 type="number"
@@ -207,7 +208,7 @@ export default function AdminInsurancePackagesPage() {
                 onChange={(event) =>
                   setForm({ ...form, coverage_amount: event.target.value })
                 }
-                placeholder="Coverage"
+                placeholder="Quyền lợi bảo hiểm"
                 required
                 step="0.01"
                 type="number"
@@ -224,7 +225,7 @@ export default function AdminInsurancePackagesPage() {
                     duration_months: Number(event.target.value),
                   })
                 }
-                placeholder="Duration"
+                placeholder="Thời hạn"
                 required
                 type="number"
                 value={form.duration_months}
@@ -239,8 +240,8 @@ export default function AdminInsurancePackagesPage() {
                 }
                 value={form.status}
               >
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
+                <option value="active">Đang hoạt động</option>
+                <option value="inactive">Ngừng hoạt động</option>
               </select>
             </div>
             <div className="flex gap-3">
@@ -249,7 +250,7 @@ export default function AdminInsurancePackagesPage() {
                 disabled={isSaving}
                 type="submit"
               >
-                {isSaving ? "Saving..." : "Save"}
+                {isSaving ? "Đang lưu..." : "Lưu"}
               </button>
               {editingId ? (
                 <button
@@ -259,9 +260,7 @@ export default function AdminInsurancePackagesPage() {
                     setForm(emptyForm);
                   }}
                   type="button"
-                >
-                  Cancel
-                </button>
+                >Hủy</button>
               ) : null}
             </div>
           </div>
@@ -272,7 +271,7 @@ export default function AdminInsurancePackagesPage() {
             <input
               className="min-w-64 flex-1 rounded-md border border-slate-300 px-3 py-2"
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search packages"
+              placeholder="Tìm kiếm gói bảo hiểm"
               value={search}
             />
             <select
@@ -282,35 +281,33 @@ export default function AdminInsurancePackagesPage() {
               }
               value={statusFilter}
             >
-              <option value="all">All statuses</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
+              <option value="all">Tất cả trạng thái</option>
+              <option value="active">Đang hoạt động</option>
+              <option value="inactive">Ngừng hoạt động</option>
             </select>
             <button
               className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold"
               type="submit"
-            >
-              Search
-            </button>
+            >Tìm kiếm</button>
           </form>
 
           <div className="mt-5 overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm">
             {isLoading ? (
-              <p className="p-5 text-sm font-medium text-slate-500">Loading...</p>
+              <p className="p-5 text-sm font-medium text-slate-500">Đang tải...</p>
             ) : packages.length === 0 ? (
               <p className="p-5 text-sm font-medium text-slate-500">
-                No packages found.
+                Chưa có gói bảo hiểm.
               </p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[760px] text-left text-sm">
                   <thead className="bg-slate-50 text-xs uppercase text-slate-500">
                     <tr>
-                      <th className="px-4 py-3">Package</th>
-                      <th className="px-4 py-3">Premium</th>
-                      <th className="px-4 py-3">Coverage</th>
-                      <th className="px-4 py-3">Status</th>
-                      <th className="px-4 py-3">Actions</th>
+                      <th className="px-4 py-3">Gói bảo hiểm</th>
+                      <th className="px-4 py-3">Phí bảo hiểm</th>
+                      <th className="px-4 py-3">Quyền lợi bảo hiểm</th>
+                      <th className="px-4 py-3">Trạng thái</th>
+                      <th className="px-4 py-3">Thao tác</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200">
@@ -330,7 +327,7 @@ export default function AdminInsurancePackagesPage() {
                         <td className="px-4 py-3">{packageItem.premium_amount}</td>
                         <td className="px-4 py-3">{packageItem.coverage_amount}</td>
                         <td className="px-4 py-3 capitalize">
-                          {packageItem.status}
+                          <StatusBadge value={packageItem.status} />
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex flex-wrap gap-2">
@@ -338,22 +335,18 @@ export default function AdminInsurancePackagesPage() {
                               className="rounded-md border border-slate-300 px-3 py-1 text-xs font-semibold"
                               onClick={() => handleEdit(packageItem)}
                               type="button"
-                            >
-                              Edit
-                            </button>
+                            >Chỉnh sửa</button>
                             <button
                               className="rounded-md border border-amber-300 px-3 py-1 text-xs font-semibold text-amber-700"
                               onClick={() => void handleDeactivate(packageItem.id)}
                               type="button"
-                            >
-                              Deactivate
-                            </button>
+                            >Ngừng hoạt động</button>
                             <button
                               className="rounded-md border border-red-300 px-3 py-1 text-xs font-semibold text-red-700"
                               onClick={() => void handleDelete(packageItem.id)}
                               type="button"
                             >
-                              Delete
+                              Xóa
                             </button>
                           </div>
                         </td>

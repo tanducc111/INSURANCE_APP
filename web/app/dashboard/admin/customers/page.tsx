@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 
+import { StatusBadge } from "@/components/ui/status-badge";
 import { useAdminAccess } from "@/hooks/use-admin-access";
 import { ApiError } from "@/services/api-client";
 import {
@@ -44,7 +45,7 @@ export default function AdminCustomersPage() {
       const data = await listCustomers(token, { search, limit: 100 });
       setCustomers(data);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to load customers");
+      setError(err instanceof ApiError ? err.message : "Không thể tải khách hàng");
     } finally {
       setIsLoading(false);
     }
@@ -94,7 +95,7 @@ export default function AdminCustomersPage() {
       setEditingId(null);
       await loadCustomers();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to save customer");
+      setError(err instanceof ApiError ? err.message : "Không thể lưu khách hàng");
     } finally {
       setIsSaving(false);
     }
@@ -115,14 +116,14 @@ export default function AdminCustomersPage() {
   }
 
   if (!isReady) {
-    return <p className="text-sm font-medium text-slate-600">Loading...</p>;
+    return <p className="text-sm font-medium text-slate-600">Đang tải...</p>;
   }
 
   return (
     <div className="mx-auto max-w-7xl">
       <header className="border-b border-slate-200 pb-5">
-        <p className="text-sm font-medium uppercase text-ocean">Admin</p>
-        <h1 className="mt-2 text-3xl font-semibold">Customers</h1>
+        <p className="text-sm font-medium uppercase text-ocean">Quản trị</p>
+        <h1 className="mt-2 text-3xl font-semibold">Khách hàng</h1>
       </header>
 
       {error ? (
@@ -137,7 +138,7 @@ export default function AdminCustomersPage() {
           onSubmit={handleSubmit}
         >
           <h2 className="text-lg font-semibold">
-            {editingId ? "Edit Customer" : "Create Customer"}
+            {editingId ? "Chỉnh sửa khách hàng" : "Tạo khách hàng"}
           </h2>
           <div className="mt-5 grid gap-4">
             <input
@@ -155,7 +156,7 @@ export default function AdminCustomersPage() {
                 onChange={(event) =>
                   setForm({ ...form, password: event.target.value })
                 }
-                placeholder="Initial password"
+                placeholder="Mật khẩu ban đầu"
                 required
                 type="password"
                 value={form.password ?? ""}
@@ -166,7 +167,7 @@ export default function AdminCustomersPage() {
               onChange={(event) =>
                 setForm({ ...form, full_name: event.target.value })
               }
-              placeholder="Full name"
+              placeholder="Họ và tên"
               required
               value={form.full_name}
             />
@@ -175,7 +176,7 @@ export default function AdminCustomersPage() {
               onChange={(event) =>
                 setForm({ ...form, customer_code: event.target.value })
               }
-              placeholder="Customer code"
+              placeholder="Mã khách hàng"
               required
               value={form.customer_code}
             />
@@ -193,7 +194,7 @@ export default function AdminCustomersPage() {
                 onChange={(event) =>
                   setForm({ ...form, identity_number: event.target.value })
                 }
-                placeholder="Identity number"
+                placeholder="Số CCCD/CMND"
                 value={form.identity_number ?? ""}
               />
             </div>
@@ -202,7 +203,7 @@ export default function AdminCustomersPage() {
               onChange={(event) =>
                 setForm({ ...form, address: event.target.value })
               }
-              placeholder="Address"
+              placeholder="Địa chỉ"
               value={form.address ?? ""}
             />
             <select
@@ -212,8 +213,8 @@ export default function AdminCustomersPage() {
               }
               value={form.status}
             >
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
+              <option value="active">Đang hoạt động</option>
+              <option value="inactive">Ngừng hoạt động</option>
             </select>
             <div className="flex gap-3">
               <button
@@ -221,7 +222,7 @@ export default function AdminCustomersPage() {
                 disabled={isSaving}
                 type="submit"
               >
-                {isSaving ? "Saving..." : "Save"}
+                {isSaving ? "Đang lưu..." : "Lưu"}
               </button>
               {editingId ? (
                 <button
@@ -231,9 +232,7 @@ export default function AdminCustomersPage() {
                     setForm(emptyForm);
                   }}
                   type="button"
-                >
-                  Cancel
-                </button>
+                >Hủy</button>
               ) : null}
             </div>
           </div>
@@ -244,33 +243,31 @@ export default function AdminCustomersPage() {
             <input
               className="min-w-64 flex-1 rounded-md border border-slate-300 px-3 py-2"
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search customers"
+              placeholder="Tìm kiếm khách hàng"
               value={search}
             />
             <button
               className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold"
               type="submit"
-            >
-              Search
-            </button>
+            >Tìm kiếm</button>
           </form>
 
           <div className="mt-5 overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm">
             {isLoading ? (
-              <p className="p-5 text-sm font-medium text-slate-500">Loading...</p>
+              <p className="p-5 text-sm font-medium text-slate-500">Đang tải...</p>
             ) : customers.length === 0 ? (
               <p className="p-5 text-sm font-medium text-slate-500">
-                No customers found.
+                Chưa có khách hàng.
               </p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[760px] text-left text-sm">
                   <thead className="bg-slate-50 text-xs uppercase text-slate-500">
                     <tr>
-                      <th className="px-4 py-3">Customer</th>
-                      <th className="px-4 py-3">Identity</th>
-                      <th className="px-4 py-3">Status</th>
-                      <th className="px-4 py-3">Actions</th>
+                      <th className="px-4 py-3">Khách hàng</th>
+                      <th className="px-4 py-3">Số CCCD/CMND</th>
+                      <th className="px-4 py-3">Trạng thái</th>
+                      <th className="px-4 py-3">Thao tác</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200">
@@ -283,17 +280,15 @@ export default function AdminCustomersPage() {
                           </p>
                         </td>
                         <td className="px-4 py-3">
-                          {customer.identity_number || "Not provided"}
+                          {customer.identity_number || "Chưa cung cấp"}
                         </td>
-                        <td className="px-4 py-3 capitalize">{customer.status}</td>
+                        <td className="px-4 py-3"><StatusBadge value={customer.status} /></td>
                         <td className="px-4 py-3">
                           <button
                             className="rounded-md border border-slate-300 px-3 py-1 text-xs font-semibold"
                             onClick={() => handleEdit(customer)}
                             type="button"
-                          >
-                            Edit
-                          </button>
+                          >Chỉnh sửa</button>
                         </td>
                       </tr>
                     ))}

@@ -6,6 +6,7 @@ import {
   ClaimStatusBadge,
   formatClaimLabel,
 } from "@/components/claims/claim-status-badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { useRoleAccess } from "@/hooks/use-role-access";
 import { ApiError } from "@/services/api-client";
 import {
@@ -59,7 +60,7 @@ export default function EmployeeClaimsPage() {
         data.some((claim) => claim.id === current) ? current : data[0]?.id ?? null,
       );
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to load claims");
+      setError(err instanceof ApiError ? err.message : "Không thể tải hồ sơ bồi thường");
     } finally {
       setIsLoading(false);
     }
@@ -105,7 +106,7 @@ export default function EmployeeClaimsPage() {
         await updateEmployeeClaimStatus(token, selectedClaim.id, nextStatus),
       );
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to update status");
+      setError(err instanceof ApiError ? err.message : "Không thể cập nhật trạng thái");
     } finally {
       setIsSaving(false);
     }
@@ -124,21 +125,21 @@ export default function EmployeeClaimsPage() {
         await addEmployeeReviewNote(token, selectedClaim.id, reviewNote),
       );
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to save note");
+      setError(err instanceof ApiError ? err.message : "Không thể lưu ghi chú");
     } finally {
       setIsSaving(false);
     }
   }
 
   if (!isReady) {
-    return <p className="text-sm font-medium text-slate-600">Loading...</p>;
+    return <p className="text-sm font-medium text-slate-600">Đang tải...</p>;
   }
 
   return (
     <div className="mx-auto max-w-7xl">
       <header className="border-b border-slate-200 pb-5">
-        <p className="text-sm font-medium uppercase text-ocean">Employee</p>
-        <h1 className="mt-2 text-3xl font-semibold">Claims Review</h1>
+        <p className="text-sm font-medium uppercase text-ocean">Nhân viên</p>
+        <h1 className="mt-2 text-3xl font-semibold">Xử lý bồi thường</h1>
       </header>
 
       {error ? (
@@ -151,7 +152,7 @@ export default function EmployeeClaimsPage() {
         <input
           className="min-w-64 flex-1 rounded-md border border-slate-300 px-3 py-2"
           onChange={(event) => setSearch(event.target.value)}
-          placeholder="Search claims"
+          placeholder="Tìm kiếm hồ sơ bồi thường"
           value={search}
         />
         <select
@@ -161,13 +162,13 @@ export default function EmployeeClaimsPage() {
           }
           value={statusFilter}
         >
-          <option value="all">All statuses</option>
-          <option value="pending">Pending</option>
-          <option value="reviewing">Reviewing</option>
-          <option value="need_more_documents">Need documents</option>
-          <option value="approved">Approved</option>
-          <option value="rejected">Rejected</option>
-          <option value="completed">Completed</option>
+          <option value="all">Tất cả trạng thái</option>
+          <option value="pending">Chờ xử lý</option>
+          <option value="reviewing">Đang xem xét</option>
+          <option value="need_more_documents">Cần bổ sung hồ sơ</option>
+          <option value="approved">Đã duyệt</option>
+          <option value="rejected">Từ chối</option>
+          <option value="completed">Hoàn tất</option>
         </select>
         <select
           className="rounded-md border border-slate-300 px-3 py-2"
@@ -176,11 +177,11 @@ export default function EmployeeClaimsPage() {
           }
           value={typeFilter}
         >
-          <option value="all">All types</option>
-          <option value="accident">Accident</option>
-          <option value="hospital">Hospital</option>
-          <option value="damage">Damage</option>
-          <option value="other">Other</option>
+          <option value="all">Tất cả loại sự cố</option>
+          <option value="accident">Tai nạn</option>
+          <option value="hospital">Nằm viện</option>
+          <option value="damage">Thiệt hại</option>
+          <option value="other">Khác</option>
         </select>
         <select
           className="rounded-md border border-slate-300 px-3 py-2"
@@ -189,38 +190,38 @@ export default function EmployeeClaimsPage() {
           }
           value={priorityFilter}
         >
-          <option value="all">All priorities</option>
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
-          <option value="urgent">Urgent</option>
+          <option value="all">Tất cả mức ưu tiên</option>
+          <option value="low">Thấp</option>
+          <option value="medium">Trung bình</option>
+          <option value="high">Cao</option>
+          <option value="urgent">Khẩn cấp</option>
         </select>
         <button
           className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold"
           type="submit"
         >
-          Filter
+          Lọc
         </button>
       </form>
 
       <section className="mt-5 grid gap-6 xl:grid-cols-[1fr_420px]">
         <div className="overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm">
           {isLoading ? (
-            <p className="p-5 text-sm font-medium text-slate-500">Loading...</p>
+            <p className="p-5 text-sm font-medium text-slate-500">Đang tải...</p>
           ) : claims.length === 0 ? (
             <p className="p-5 text-sm font-medium text-slate-500">
-              No assigned customer claims found.
+              Chưa có hồ sơ bồi thường từ khách hàng được phân công.
             </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[860px] text-left text-sm">
                 <thead className="bg-slate-50 text-xs uppercase text-slate-500">
                   <tr>
-                    <th className="px-4 py-3">Claim</th>
-                    <th className="px-4 py-3">Customer</th>
-                    <th className="px-4 py-3">Incident</th>
-                    <th className="px-4 py-3">Priority</th>
-                    <th className="px-4 py-3">Status</th>
+                    <th className="px-4 py-3">Hồ sơ</th>
+                    <th className="px-4 py-3">Khách hàng</th>
+                    <th className="px-4 py-3">Loại sự cố</th>
+                    <th className="px-4 py-3">Ưu tiên</th>
+                    <th className="px-4 py-3">Trạng thái</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
@@ -242,7 +243,9 @@ export default function EmployeeClaimsPage() {
                       <td className="px-4 py-3 capitalize">
                         {formatClaimLabel(claim.incident_type)}
                       </td>
-                      <td className="px-4 py-3 capitalize">{claim.priority}</td>
+                      <td className="px-4 py-3">
+                        <StatusBadge value={claim.priority} />
+                      </td>
                       <td className="px-4 py-3">
                         <ClaimStatusBadge status={claim.status} />
                       </td>
@@ -268,11 +271,11 @@ export default function EmployeeClaimsPage() {
               </div>
 
               <div className="grid gap-2 text-sm text-slate-600">
-                <p>Policy: {selectedClaim.policy_number}</p>
-                <p>Date: {selectedClaim.incident_date}</p>
-                <p>Location: {selectedClaim.location || "Not provided"}</p>
+                <p>Hợp đồng bảo hiểm: {selectedClaim.policy_number}</p>
+                <p>Ngày xảy ra: {selectedClaim.incident_date}</p>
+                <p>Địa điểm: {selectedClaim.location || "Chưa cung cấp"}</p>
                 <p className="capitalize">
-                  Type: {formatClaimLabel(selectedClaim.incident_type)}
+                  Loại sự cố: {formatClaimLabel(selectedClaim.incident_type)}
                 </p>
               </div>
 
@@ -288,19 +291,19 @@ export default function EmployeeClaimsPage() {
                   }
                   value={nextStatus}
                 >
-                  <option value="pending">Pending</option>
-                  <option value="reviewing">Reviewing</option>
-                  <option value="need_more_documents">Need documents</option>
-                  <option value="approved">Approved</option>
-                  <option value="rejected">Rejected</option>
-                  <option value="completed">Completed</option>
+                  <option value="pending">Chờ xử lý</option>
+                  <option value="reviewing">Đang xem xét</option>
+                  <option value="need_more_documents">Cần bổ sung hồ sơ</option>
+                  <option value="approved">Đã duyệt</option>
+                  <option value="rejected">Từ chối</option>
+                  <option value="completed">Hoàn tất</option>
                 </select>
                 <button
                   className="rounded-md bg-ocean px-4 py-2 text-sm font-semibold text-white disabled:bg-slate-300"
                   disabled={isSaving}
                   type="submit"
                 >
-                  {isSaving ? "Saving..." : "Update Status"}
+                  {isSaving ? "Đang lưu..." : "Cập nhật trạng thái"}
                 </button>
               </form>
 
@@ -308,7 +311,7 @@ export default function EmployeeClaimsPage() {
                 <textarea
                   className="min-h-28 rounded-md border border-slate-300 px-3 py-2"
                   onChange={(event) => setReviewNote(event.target.value)}
-                  placeholder="Review note"
+                  placeholder="Ghi chú thẩm định"
                   required
                   value={reviewNote}
                 />
@@ -317,17 +320,17 @@ export default function EmployeeClaimsPage() {
                   disabled={isSaving}
                   type="submit"
                 >
-                  {isSaving ? "Saving..." : "Save Review Note"}
+                  {isSaving ? "Đang lưu..." : "Lưu ghi chú thẩm định"}
                 </button>
               </form>
 
               <div>
                 <h3 className="text-sm font-semibold uppercase text-slate-500">
-                  Attachments
+                  Tệp đính kèm
                 </h3>
                 {selectedClaim.attachments.length === 0 ? (
                   <p className="mt-3 text-sm font-medium text-slate-500">
-                    No attachments uploaded.
+                    Chưa có tệp đính kèm.
                   </p>
                 ) : (
                   <div className="mt-3 divide-y divide-slate-200">
@@ -346,7 +349,7 @@ export default function EmployeeClaimsPage() {
             </div>
           ) : (
             <p className="text-sm font-medium text-slate-500">
-              Select a claim to review.
+              Chọn hồ sơ để thẩm định.
             </p>
           )}
         </aside>

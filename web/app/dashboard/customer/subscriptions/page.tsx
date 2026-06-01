@@ -27,7 +27,7 @@ export default function CustomerSubscriptionsPage() {
         setSubscriptions(await listCustomerSubscriptions(token, { limit: 100 }));
       } catch (err) {
         setError(
-          err instanceof ApiError ? err.message : "Unable to load subscriptions",
+          err instanceof ApiError ? err.message : "Không thể tải hợp đồng bảo hiểm",
         );
       } finally {
         setIsLoading(false);
@@ -40,14 +40,14 @@ export default function CustomerSubscriptionsPage() {
   }, [isReady, token]);
 
   if (!isReady || isLoading) {
-    return <p className="text-sm font-medium text-slate-600">Loading...</p>;
+    return <p className="text-sm font-medium text-slate-600">Đang tải...</p>;
   }
 
   return (
     <div className="mx-auto max-w-6xl">
       <header className="border-b border-slate-200 pb-5">
-        <p className="text-sm font-medium uppercase text-ocean">Customer</p>
-        <h1 className="mt-2 text-3xl font-semibold">My Subscriptions</h1>
+        <p className="text-sm font-medium uppercase text-ocean">Khách hàng</p>
+        <h1 className="mt-2 text-3xl font-semibold">Hợp đồng của tôi</h1>
       </header>
 
       {error ? (
@@ -59,18 +59,18 @@ export default function CustomerSubscriptionsPage() {
       <section className="mt-6 overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm">
         {subscriptions.length === 0 ? (
           <p className="p-5 text-sm font-medium text-slate-500">
-            No subscriptions found.
+            Chưa có hợp đồng bảo hiểm.
           </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px] text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase text-slate-500">
                 <tr>
-                  <th className="px-4 py-3">Policy</th>
-                  <th className="px-4 py-3">Package</th>
+                  <th className="px-4 py-3">Hợp đồng</th>
+                  <th className="px-4 py-3">Gói bảo hiểm</th>
                   <th className="px-4 py-3">Dates</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Payment</th>
+                  <th className="px-4 py-3">Trạng thái</th>
+                  <th className="px-4 py-3">Thanh toán</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">

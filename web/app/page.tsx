@@ -1,47 +1,56 @@
 import Link from "next/link";
+import { ArrowRight, ShieldCheck } from "lucide-react";
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-mist px-6 py-8 text-ink">
-      <section className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-6xl flex-col justify-between">
-        <header className="flex items-center justify-between border-b border-slate-200 pb-5">
-          <div>
-            <p className="text-sm font-medium uppercase text-ocean">
-              Operations
-            </p>
-            <h1 className="mt-2 text-3xl font-semibold">Insurance Management</h1>
-          </div>
-          <Link
-            className="rounded-md bg-ocean px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800"
-            href="/login"
-          >
-            Sign in
-          </Link>
-        </header>
+    <main className="min-h-screen bg-mist px-6 py-16 text-ink">
+      <section className="mx-auto grid max-w-6xl gap-10 rounded-lg border border-border bg-white p-8 shadow-soft md:grid-cols-[1.1fr_0.9fr]">
+        <div>
+          <p className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-sm font-bold text-primary">
+            <ShieldCheck aria-hidden className="h-4 w-4" />
+            Nền tảng quản lý bảo hiểm
+          </p>
+          <h1 className="mt-6 text-4xl font-extrabold leading-tight md:text-5xl">
+            Vận hành bảo hiểm chuyên nghiệp cho quản trị, nhân viên và khách hàng
+          </h1>
+          <p className="mt-5 max-w-2xl text-base leading-7 text-muted">
+            Theo dõi hợp đồng, hồ sơ bồi thường, lịch hẹn, chat hỗ trợ và tài
+            liệu tri thức doanh nghiệp trong một không gian bảo mật.
+          </p>
 
-        <div className="grid gap-4 py-10 md:grid-cols-3">
-          <div className="rounded-md border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-sm font-medium text-slate-500">Admin</p>
-            <p className="mt-2 text-2xl font-semibold">Company control</p>
-          </div>
-          <div className="rounded-md border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-sm font-medium text-slate-500">Employee</p>
-            <p className="mt-2 text-2xl font-semibold">Customer care</p>
-          </div>
-          <div className="rounded-md border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-sm font-medium text-slate-500">Customer</p>
-            <p className="mt-2 text-2xl font-semibold">Policy access</p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link
+              className="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-700"
+              href="/login"
+            >
+              Đăng nhập
+              <ArrowRight aria-hidden className="h-4 w-4" />
+            </Link>
+            <Link
+              className="rounded-md border border-border bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+              href="/dashboard"
+            >
+              Vào bảng điều khiển
+            </Link>
           </div>
         </div>
-
-        <footer className="flex flex-wrap items-center gap-3 border-t border-slate-200 pt-5">
-          <Link
-            className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-ink transition hover:border-ocean hover:text-ocean"
-            href="/dashboard"
-          >
-            Open dashboard
-          </Link>
-        </footer>
+        <div className="rounded-lg border border-border bg-mist p-5">
+          <div className="grid gap-3">
+            {["Hợp đồng đang hiệu lực", "Bồi thường chờ xử lý", "Lịch hẹn hôm nay"].map(
+              (item, index) => (
+                <div
+                  className="rounded-lg border border-border bg-white p-4 shadow-sm"
+                  key={item}
+                >
+                  <p className="text-sm font-bold text-muted">{item}</p>
+                  <p className="mt-2 text-3xl font-extrabold text-ink">
+                    {[128, 24, 9][index]}
+                  </p>
+                </div>
+              ),
+            )}
+          </div>
+        </div>
       </section>
     </main>
   );

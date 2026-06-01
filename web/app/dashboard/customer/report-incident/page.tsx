@@ -53,7 +53,7 @@ export default function CustomerReportIncidentPage() {
         }));
       } catch (err) {
         setError(
-          err instanceof ApiError ? err.message : "Unable to load subscriptions",
+          err instanceof ApiError ? err.message : "Không thể tải hợp đồng bảo hiểm",
         );
       } finally {
         setIsLoading(false);
@@ -81,21 +81,21 @@ export default function CustomerReportIncidentPage() {
       });
       router.push(`/dashboard/customer/claims/${claim.id}`);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to submit claim");
+      setError(err instanceof ApiError ? err.message : "Không thể gửi hồ sơ bồi thường");
     } finally {
       setIsSaving(false);
     }
   }
 
   if (!isReady || isLoading) {
-    return <p className="text-sm font-medium text-slate-600">Loading...</p>;
+    return <p className="text-sm font-medium text-slate-600">Đang tải...</p>;
   }
 
   return (
     <div className="mx-auto max-w-4xl">
       <header className="border-b border-slate-200 pb-5">
-        <p className="text-sm font-medium uppercase text-ocean">Customer</p>
-        <h1 className="mt-2 text-3xl font-semibold">Report Incident</h1>
+        <p className="text-sm font-medium uppercase text-ocean">Khách hàng</p>
+        <h1 className="mt-2 text-3xl font-semibold">Báo cáo sự cố</h1>
       </header>
 
       {error ? (
@@ -132,7 +132,7 @@ export default function CustomerReportIncidentPage() {
           <input
             className="rounded-md border border-slate-300 px-3 py-2"
             onChange={(event) => setForm({ ...form, title: event.target.value })}
-            placeholder="Claim title"
+            placeholder="Tiêu đề hồ sơ bồi thường"
             required
             value={form.title}
           />
@@ -142,7 +142,7 @@ export default function CustomerReportIncidentPage() {
             onChange={(event) =>
               setForm({ ...form, description: event.target.value })
             }
-            placeholder="Incident description"
+            placeholder="Mô tả sự cố"
             required
             value={form.description}
           />
@@ -158,10 +158,10 @@ export default function CustomerReportIncidentPage() {
               }
               value={form.incident_type}
             >
-              <option value="accident">Accident</option>
-              <option value="hospital">Hospital</option>
-              <option value="damage">Damage</option>
-              <option value="other">Other</option>
+              <option value="accident">Tai nạn</option>
+              <option value="hospital">Nằm viện</option>
+              <option value="damage">Thiệt hại</option>
+              <option value="other">Khác</option>
             </select>
 
             <select
@@ -174,10 +174,10 @@ export default function CustomerReportIncidentPage() {
               }
               value={form.priority}
             >
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-              <option value="urgent">Urgent</option>
+              <option value="low">Thấp</option>
+              <option value="medium">Trung bình</option>
+              <option value="high">Cao</option>
+              <option value="urgent">Khẩn cấp</option>
             </select>
           </div>
 
@@ -196,7 +196,7 @@ export default function CustomerReportIncidentPage() {
               onChange={(event) =>
                 setForm({ ...form, location: event.target.value })
               }
-              placeholder="Location"
+              placeholder="Địa điểm"
               value={form.location ?? ""}
             />
           </div>
@@ -217,7 +217,7 @@ export default function CustomerReportIncidentPage() {
             disabled={isSaving || subscriptions.length === 0}
             type="submit"
           >
-            {isSaving ? "Submitting..." : "Submit Claim"}
+            {isSaving ? "Đang gửi..." : "Gửi hồ sơ bồi thường"}
           </button>
         </div>
       </form>

@@ -45,7 +45,7 @@ export default function CustomerClaimsPage() {
         }),
       );
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to load claims");
+      setError(err instanceof ApiError ? err.message : "Không thể tải hồ sơ bồi thường");
     } finally {
       setIsLoading(false);
     }
@@ -63,20 +63,20 @@ export default function CustomerClaimsPage() {
   }
 
   if (!isReady) {
-    return <p className="text-sm font-medium text-slate-600">Loading...</p>;
+    return <p className="text-sm font-medium text-slate-600">Đang tải...</p>;
   }
 
   return (
     <div className="mx-auto max-w-7xl">
       <header className="border-b border-slate-200 pb-5">
-        <p className="text-sm font-medium uppercase text-ocean">Customer</p>
+        <p className="text-sm font-medium uppercase text-ocean">Khách hàng</p>
         <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-3xl font-semibold">My Claims</h1>
+          <h1 className="text-3xl font-semibold">Hồ sơ bồi thường của tôi</h1>
           <Link
             className="rounded-md bg-ocean px-4 py-2 text-sm font-semibold text-white"
             href="/dashboard/customer/report-incident"
           >
-            Report Incident
+            Báo cáo sự cố
           </Link>
         </div>
       </header>
@@ -95,13 +95,13 @@ export default function CustomerClaimsPage() {
           }
           value={statusFilter}
         >
-          <option value="all">All statuses</option>
-          <option value="pending">Pending</option>
-          <option value="reviewing">Reviewing</option>
-          <option value="need_more_documents">Need documents</option>
-          <option value="approved">Approved</option>
-          <option value="rejected">Rejected</option>
-          <option value="completed">Completed</option>
+          <option value="all">Tất cả trạng thái</option>
+          <option value="pending">Chờ xử lý</option>
+          <option value="reviewing">Đang xem xét</option>
+          <option value="need_more_documents">Cần bổ sung hồ sơ</option>
+          <option value="approved">Đã duyệt</option>
+          <option value="rejected">Từ chối</option>
+          <option value="completed">Hoàn tất</option>
         </select>
         <select
           className="rounded-md border border-slate-300 px-3 py-2"
@@ -110,11 +110,11 @@ export default function CustomerClaimsPage() {
           }
           value={typeFilter}
         >
-          <option value="all">All types</option>
-          <option value="accident">Accident</option>
-          <option value="hospital">Hospital</option>
-          <option value="damage">Damage</option>
-          <option value="other">Other</option>
+          <option value="all">Tất cả loại sự cố</option>
+          <option value="accident">Tai nạn</option>
+          <option value="hospital">Nằm viện</option>
+          <option value="damage">Thiệt hại</option>
+          <option value="other">Khác</option>
         </select>
         <select
           className="rounded-md border border-slate-300 px-3 py-2"
@@ -123,38 +123,38 @@ export default function CustomerClaimsPage() {
           }
           value={priorityFilter}
         >
-          <option value="all">All priorities</option>
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
-          <option value="urgent">Urgent</option>
+          <option value="all">Tất cả mức ưu tiên</option>
+          <option value="low">Thấp</option>
+          <option value="medium">Trung bình</option>
+          <option value="high">Cao</option>
+          <option value="urgent">Khẩn cấp</option>
         </select>
         <button
           className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold"
           type="submit"
         >
-          Filter
+          Lọc
         </button>
       </form>
 
       <section className="mt-5 overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm">
         {isLoading ? (
-          <p className="p-5 text-sm font-medium text-slate-500">Loading...</p>
+          <p className="p-5 text-sm font-medium text-slate-500">Đang tải...</p>
         ) : claims.length === 0 ? (
           <p className="p-5 text-sm font-medium text-slate-500">
-            No claims found.
+            Chưa có hồ sơ bồi thường.
           </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[900px] text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase text-slate-500">
                 <tr>
-                  <th className="px-4 py-3">Claim</th>
-                  <th className="px-4 py-3">Policy</th>
-                  <th className="px-4 py-3">Incident</th>
-                  <th className="px-4 py-3">Priority</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Actions</th>
+                  <th className="px-4 py-3">Hồ sơ</th>
+                  <th className="px-4 py-3">Hợp đồng</th>
+                    <th className="px-4 py-3">Loại sự cố</th>
+                  <th className="px-4 py-3">Ưu tiên</th>
+                  <th className="px-4 py-3">Trạng thái</th>
+                  <th className="px-4 py-3">Thao tác</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">

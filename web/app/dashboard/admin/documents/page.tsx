@@ -44,7 +44,7 @@ export default function AdminDocumentsPage() {
           : data[0]?.id ?? null,
       );
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to load documents");
+      setError(err instanceof ApiError ? err.message : "Không thể tải tài liệu");
     } finally {
       setIsLoading(false);
     }
@@ -60,7 +60,7 @@ export default function AdminDocumentsPage() {
     try {
       setChunks(await listDocumentChunks(token, documentId));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to load chunks");
+      setError(err instanceof ApiError ? err.message : "Không thể tải đoạn tài liệu");
     } finally {
       setIsChunksLoading(false);
     }
@@ -100,7 +100,7 @@ export default function AdminDocumentsPage() {
       await loadDocuments();
       setSelectedDocumentId(uploaded.id);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to upload document");
+      setError(err instanceof ApiError ? err.message : "Không thể tải tài liệu");
     } finally {
       setIsUploading(false);
     }
@@ -119,19 +119,19 @@ export default function AdminDocumentsPage() {
       }
       await loadDocuments();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to delete document");
+      setError(err instanceof ApiError ? err.message : "Không thể xóa tài liệu");
     }
   }
 
   if (!isReady) {
-    return <p className="text-sm font-medium text-slate-600">Loading...</p>;
+    return <p className="text-sm font-medium text-slate-600">Đang tải...</p>;
   }
 
   return (
     <div className="mx-auto max-w-7xl">
       <header className="border-b border-slate-200 pb-5">
-        <p className="text-sm font-medium uppercase text-ocean">Admin</p>
-        <h1 className="mt-2 text-3xl font-semibold">Documents</h1>
+        <p className="text-sm font-medium uppercase text-ocean">Quản trị</p>
+        <h1 className="mt-2 text-3xl font-semibold">Tài liệu AI</h1>
       </header>
 
       {error ? (
@@ -145,12 +145,12 @@ export default function AdminDocumentsPage() {
           className="rounded-md border border-slate-200 bg-white p-5 shadow-sm"
           onSubmit={handleUpload}
         >
-          <h2 className="text-lg font-semibold">Upload Document</h2>
+          <h2 className="text-lg font-semibold">Tải tài liệu lên</h2>
           <div className="mt-5 grid gap-4">
             <input
               className="rounded-md border border-slate-300 px-3 py-2"
               onChange={(event) => setTitle(event.target.value)}
-              placeholder="Title"
+              placeholder="Tiêu đề"
               value={title}
             />
             <input
@@ -165,7 +165,7 @@ export default function AdminDocumentsPage() {
               disabled={isUploading || !file}
               type="submit"
             >
-              {isUploading ? "Uploading..." : "Upload"}
+              {isUploading ? "Đang tải lên..." : "Tải lên"}
             </button>
           </div>
         </form>
@@ -175,23 +175,21 @@ export default function AdminDocumentsPage() {
             <input
               className="min-w-64 flex-1 rounded-md border border-slate-300 px-3 py-2"
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search documents"
+              placeholder="Tìm kiếm tài liệu"
               value={search}
             />
             <button
               className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold"
               type="submit"
-            >
-              Search
-            </button>
+            >Tìm kiếm</button>
           </form>
 
           <div className="mt-5 overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm">
             {isLoading ? (
-              <p className="p-5 text-sm font-medium text-slate-500">Loading...</p>
+              <p className="p-5 text-sm font-medium text-slate-500">Đang tải...</p>
             ) : documents.length === 0 ? (
               <p className="p-5 text-sm font-medium text-slate-500">
-                No documents found.
+                Chưa có tài liệu.
               </p>
             ) : (
               <div className="divide-y divide-slate-200">
@@ -217,7 +215,7 @@ export default function AdminDocumentsPage() {
                       onClick={() => void handleDelete(document.id)}
                       type="button"
                     >
-                      Delete
+                      Xóa
                     </button>
                   </div>
                 ))}
@@ -227,10 +225,10 @@ export default function AdminDocumentsPage() {
 
           <div className="mt-6 rounded-md border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="text-lg font-semibold">
-              {selectedDocument ? selectedDocument.title : "Document Chunks"}
+              {selectedDocument ? selectedDocument.title : "Đoạn tài liệu"}
             </h2>
             {isChunksLoading ? (
-              <p className="mt-5 text-sm font-medium text-slate-500">Loading...</p>
+              <p className="mt-5 text-sm font-medium text-slate-500">Đang tải...</p>
             ) : chunks.length === 0 ? (
               <p className="mt-5 text-sm font-medium text-slate-500">
                 No chunks to preview.

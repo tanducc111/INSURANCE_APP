@@ -2,7 +2,12 @@
 
 import { FormEvent, useEffect, useState } from "react";
 
+import { StatusBadge } from "@/components/ui/status-badge";
 import { useRoleAccess } from "@/hooks/use-role-access";
+import {
+  getPaymentStatusLabel,
+  getSubscriptionStatusLabel,
+} from "@/lib/vi-labels";
 import { ApiError } from "@/services/api-client";
 import {
   createFollowUpNote,
@@ -44,7 +49,7 @@ export default function EmployeeCustomersPage() {
       setCustomers(data);
       setSelectedCustomerId((current) => current || data[0]?.id || null);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to load customers");
+      setError(err instanceof ApiError ? err.message : "Không thể tải khách hàng");
     } finally {
       setIsLoading(false);
     }
@@ -61,7 +66,7 @@ export default function EmployeeCustomersPage() {
       const data = await listFollowUpNotes(token, customerId);
       setNotes(data);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to load notes");
+      setError(err instanceof ApiError ? err.message : "Không thể tải ghi chú");
     } finally {
       setIsNotesLoading(false);
     }
@@ -81,7 +86,7 @@ export default function EmployeeCustomersPage() {
       setSubscriptions(data);
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Unable to load subscriptions",
+        err instanceof ApiError ? err.message : "Không thể tải hợp đồng bảo hiểm",
       );
     } finally {
       setIsSubscriptionsLoading(false);
@@ -121,21 +126,21 @@ export default function EmployeeCustomersPage() {
       setNextActionAt("");
       await loadNotes(selectedCustomerId);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to save note");
+      setError(err instanceof ApiError ? err.message : "Không thể lưu ghi chú");
     } finally {
       setIsSaving(false);
     }
   }
 
   if (!isReady) {
-    return <p className="text-sm font-medium text-slate-600">Loading...</p>;
+    return <p className="text-sm font-medium text-slate-600">Đang tải...</p>;
   }
 
   return (
     <div className="mx-auto max-w-7xl">
       <header className="border-b border-slate-200 pb-5">
-        <p className="text-sm font-medium uppercase text-ocean">Employee</p>
-        <h1 className="mt-2 text-3xl font-semibold">Assigned Customers</h1>
+        <p className="text-sm font-medium uppercase text-ocean">Nhân viên</p>
+        <h1 className="mt-2 text-3xl font-semibold">Khách hàng được phân công</h1>
       </header>
 
       {error ? (
@@ -147,10 +152,10 @@ export default function EmployeeCustomersPage() {
       <section className="mt-6 grid gap-6 lg:grid-cols-[360px_1fr]">
         <div className="overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm">
           {isLoading ? (
-            <p className="p-5 text-sm font-medium text-slate-500">Loading...</p>
+            <p className="p-5 text-sm font-medium text-slate-500">Đang tải...</p>
           ) : customers.length === 0 ? (
             <p className="p-5 text-sm font-medium text-slate-500">
-              No assigned customers found.
+              Chưa có khách hàng được phân công.
             </p>
           ) : (
             <div className="divide-y divide-slate-200">
@@ -178,43 +183,45 @@ export default function EmployeeCustomersPage() {
         <section className="space-y-6">
           <div className="rounded-md border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="text-lg font-semibold">
-              {selectedCustomer ? selectedCustomer.full_name : "Customer"}
+              {selectedCustomer ? selectedCustomer.full_name : "Khách hàng"}
             </h2>
             {selectedCustomer ? (
               <div className="mt-4 grid gap-3 text-sm text-slate-600 md:grid-cols-2">
-                <p>Code: {selectedCustomer.customer_code}</p>
+                <p>Mã: {selectedCustomer.customer_code}</p>
                 <p>Email: {selectedCustomer.email}</p>
-                <p>Status: {selectedCustomer.status}</p>
                 <p>
-                  Identity: {selectedCustomer.identity_number || "Not provided"}
+                  Trạng thái: <StatusBadge value={selectedCustomer.status} />
+                </p>
+                <p>
+                  Số CCCD/CMND: {selectedCustomer.identity_number || "Chưa cung cấp"}
                 </p>
               </div>
             ) : (
               <p className="mt-4 text-sm font-medium text-slate-500">
-                Select a customer to view details.
+                Chọn khách hàng để xem chi tiết.
               </p>
             )}
           </div>
 
           <div className="rounded-md border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 className="text-lg font-semibold">Subscriptions</h2>
+            <h2 className="text-lg font-semibold">Hợp đồng bảo hiểm</h2>
             {isSubscriptionsLoading ? (
               <p className="mt-5 text-sm font-medium text-slate-500">
-                Loading...
+                Đang tải...
               </p>
             ) : subscriptions.length === 0 ? (
               <p className="mt-5 text-sm font-medium text-slate-500">
-                No subscriptions found.
+                Chưa có hợp đồng bảo hiểm.
               </p>
             ) : (
               <div className="mt-5 overflow-x-auto">
                 <table className="w-full min-w-[680px] text-left text-sm">
                   <thead className="bg-slate-50 text-xs uppercase text-slate-500">
                     <tr>
-                      <th className="px-4 py-3">Policy</th>
-                      <th className="px-4 py-3">Package</th>
-                      <th className="px-4 py-3">Status</th>
-                      <th className="px-4 py-3">Payment</th>
+                      <th className="px-4 py-3">Hợp đồng</th>
+                      <th className="px-4 py-3">Gói bảo hiểm</th>
+                      <th className="px-4 py-3">Trạng thái</th>
+                      <th className="px-4 py-3">Thanh toán</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200">
@@ -227,10 +234,10 @@ export default function EmployeeCustomersPage() {
                           {subscription.package_name}
                         </td>
                         <td className="px-4 py-3 capitalize">
-                          {subscription.status}
+                          {getSubscriptionStatusLabel(subscription.status)}
                         </td>
                         <td className="px-4 py-3 capitalize">
-                          {subscription.payment_status}
+                          {getPaymentStatusLabel(subscription.payment_status)}
                         </td>
                       </tr>
                     ))}
@@ -244,12 +251,12 @@ export default function EmployeeCustomersPage() {
             className="rounded-md border border-slate-200 bg-white p-5 shadow-sm"
             onSubmit={handleSubmit}
           >
-            <h2 className="text-lg font-semibold">Follow-up Note</h2>
+            <h2 className="text-lg font-semibold">Ghi chú chăm sóc</h2>
             <div className="mt-5 grid gap-4">
               <textarea
                 className="min-h-28 rounded-md border border-slate-300 px-3 py-2"
                 onChange={(event) => setNote(event.target.value)}
-                placeholder="Write a care note"
+                placeholder="Nhập ghi chú chăm sóc"
                 required
                 value={note}
               />
@@ -264,18 +271,18 @@ export default function EmployeeCustomersPage() {
                 disabled={isSaving || !selectedCustomerId}
                 type="submit"
               >
-                {isSaving ? "Saving..." : "Save Note"}
+                {isSaving ? "Đang lưu..." : "Lưu ghi chú"}
               </button>
             </div>
           </form>
 
           <div className="rounded-md border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 className="text-lg font-semibold">Notes</h2>
+            <h2 className="text-lg font-semibold">Ghi chú</h2>
             {isNotesLoading ? (
-              <p className="mt-5 text-sm font-medium text-slate-500">Loading...</p>
+              <p className="mt-5 text-sm font-medium text-slate-500">Đang tải...</p>
             ) : notes.length === 0 ? (
               <p className="mt-5 text-sm font-medium text-slate-500">
-                No follow-up notes found.
+                Chưa có ghi chú chăm sóc.
               </p>
             ) : (
               <div className="mt-5 space-y-3">
@@ -290,7 +297,7 @@ export default function EmployeeCustomersPage() {
                       <span>{new Date(item.created_at).toLocaleString()}</span>
                       {item.next_action_at ? (
                         <span>
-                          Next: {new Date(item.next_action_at).toLocaleString()}
+                          Tiếp theo: {new Date(item.next_action_at).toLocaleString()}
                         </span>
                       ) : null}
                     </div>

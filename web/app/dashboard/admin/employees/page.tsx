@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 
+import { StatusBadge } from "@/components/ui/status-badge";
 import { useAdminAccess } from "@/hooks/use-admin-access";
 import { ApiError } from "@/services/api-client";
 import {
@@ -44,7 +45,7 @@ export default function AdminEmployeesPage() {
       const data = await listEmployees(token, { search, limit: 100 });
       setEmployees(data);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to load employees");
+      setError(err instanceof ApiError ? err.message : "Không thể tải nhân viên");
     } finally {
       setIsLoading(false);
     }
@@ -92,7 +93,7 @@ export default function AdminEmployeesPage() {
       setEditingId(null);
       await loadEmployees();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to save employee");
+      setError(err instanceof ApiError ? err.message : "Không thể lưu nhân viên");
     } finally {
       setIsSaving(false);
     }
@@ -113,14 +114,14 @@ export default function AdminEmployeesPage() {
   }
 
   if (!isReady) {
-    return <p className="text-sm font-medium text-slate-600">Loading...</p>;
+    return <p className="text-sm font-medium text-slate-600">Đang tải...</p>;
   }
 
   return (
     <div className="mx-auto max-w-7xl">
       <header className="border-b border-slate-200 pb-5">
-        <p className="text-sm font-medium uppercase text-ocean">Admin</p>
-        <h1 className="mt-2 text-3xl font-semibold">Employees</h1>
+        <p className="text-sm font-medium uppercase text-ocean">Quản trị</p>
+        <h1 className="mt-2 text-3xl font-semibold">Nhân viên</h1>
       </header>
 
       {error ? (
@@ -135,7 +136,7 @@ export default function AdminEmployeesPage() {
           onSubmit={handleSubmit}
         >
           <h2 className="text-lg font-semibold">
-            {editingId ? "Edit Employee" : "Create Employee"}
+            {editingId ? "Chỉnh sửa nhân viên" : "Tạo nhân viên"}
           </h2>
           <div className="mt-5 grid gap-4">
             <input
@@ -153,7 +154,7 @@ export default function AdminEmployeesPage() {
                 onChange={(event) =>
                   setForm({ ...form, password: event.target.value })
                 }
-                placeholder="Initial password"
+                placeholder="Mật khẩu ban đầu"
                 required
                 type="password"
                 value={form.password ?? ""}
@@ -164,7 +165,7 @@ export default function AdminEmployeesPage() {
               onChange={(event) =>
                 setForm({ ...form, full_name: event.target.value })
               }
-              placeholder="Full name"
+              placeholder="Họ và tên"
               required
               value={form.full_name}
             />
@@ -173,7 +174,7 @@ export default function AdminEmployeesPage() {
               onChange={(event) =>
                 setForm({ ...form, employee_code: event.target.value })
               }
-              placeholder="Employee code"
+              placeholder="Mã nhân viên"
               required
               value={form.employee_code}
             />
@@ -183,7 +184,7 @@ export default function AdminEmployeesPage() {
                 onChange={(event) =>
                   setForm({ ...form, department: event.target.value })
                 }
-                placeholder="Department"
+                placeholder="Phòng ban"
                 value={form.department ?? ""}
               />
               <input
@@ -191,7 +192,7 @@ export default function AdminEmployeesPage() {
                 onChange={(event) =>
                   setForm({ ...form, position: event.target.value })
                 }
-                placeholder="Position"
+                placeholder="Chức vụ"
                 value={form.position ?? ""}
               />
             </div>
@@ -211,8 +212,8 @@ export default function AdminEmployeesPage() {
                 }
                 value={form.status}
               >
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
+                <option value="active">Đang hoạt động</option>
+                <option value="inactive">Ngừng hoạt động</option>
               </select>
             </div>
             <div className="flex gap-3">
@@ -221,7 +222,7 @@ export default function AdminEmployeesPage() {
                 disabled={isSaving}
                 type="submit"
               >
-                {isSaving ? "Saving..." : "Save"}
+                {isSaving ? "Đang lưu..." : "Lưu"}
               </button>
               {editingId ? (
                 <button
@@ -231,9 +232,7 @@ export default function AdminEmployeesPage() {
                     setForm(emptyForm);
                   }}
                   type="button"
-                >
-                  Cancel
-                </button>
+                >Hủy</button>
               ) : null}
             </div>
           </div>
@@ -244,33 +243,31 @@ export default function AdminEmployeesPage() {
             <input
               className="min-w-64 flex-1 rounded-md border border-slate-300 px-3 py-2"
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search employees"
+              placeholder="Tìm kiếm nhân viên"
               value={search}
             />
             <button
               className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold"
               type="submit"
-            >
-              Search
-            </button>
+            >Tìm kiếm</button>
           </form>
 
           <div className="mt-5 overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm">
             {isLoading ? (
-              <p className="p-5 text-sm font-medium text-slate-500">Loading...</p>
+              <p className="p-5 text-sm font-medium text-slate-500">Đang tải...</p>
             ) : employees.length === 0 ? (
               <p className="p-5 text-sm font-medium text-slate-500">
-                No employees found.
+                Chưa có nhân viên.
               </p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[720px] text-left text-sm">
                   <thead className="bg-slate-50 text-xs uppercase text-slate-500">
                     <tr>
-                      <th className="px-4 py-3">Employee</th>
-                      <th className="px-4 py-3">Department</th>
-                      <th className="px-4 py-3">Status</th>
-                      <th className="px-4 py-3">Actions</th>
+                      <th className="px-4 py-3">Nhân viên</th>
+                      <th className="px-4 py-3">Phòng ban</th>
+                      <th className="px-4 py-3">Trạng thái</th>
+                      <th className="px-4 py-3">Thao tác</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200">
@@ -283,17 +280,15 @@ export default function AdminEmployeesPage() {
                           </p>
                         </td>
                         <td className="px-4 py-3">
-                          {employee.department || "Unassigned"}
+                          {employee.department || "Chưa phân công"}
                         </td>
-                        <td className="px-4 py-3 capitalize">{employee.status}</td>
+                        <td className="px-4 py-3"><StatusBadge value={employee.status} /></td>
                         <td className="px-4 py-3">
                           <button
                             className="rounded-md border border-slate-300 px-3 py-1 text-xs font-semibold"
                             onClick={() => handleEdit(employee)}
                             type="button"
-                          >
-                            Edit
-                          </button>
+                          >Chỉnh sửa</button>
                         </td>
                       </tr>
                     ))}

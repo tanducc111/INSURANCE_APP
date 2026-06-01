@@ -53,7 +53,7 @@ export default function EmployeeAppointmentsPage() {
       );
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Unable to load appointments",
+        err instanceof ApiError ? err.message : "Không thể tải lịch hẹn",
       );
     } finally {
       setIsLoading(false);
@@ -106,7 +106,7 @@ export default function EmployeeAppointmentsPage() {
       );
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Unable to update appointment",
+        err instanceof ApiError ? err.message : "Không thể cập nhật lịch hẹn",
       );
     } finally {
       setIsSaving(false);
@@ -114,14 +114,14 @@ export default function EmployeeAppointmentsPage() {
   }
 
   if (!isReady) {
-    return <p className="text-sm font-medium text-slate-600">Loading...</p>;
+    return <p className="text-sm font-medium text-slate-600">Đang tải...</p>;
   }
 
   return (
     <div className="mx-auto max-w-7xl">
       <header className="border-b border-slate-200 pb-5">
-        <p className="text-sm font-medium uppercase text-ocean">Employee</p>
-        <h1 className="mt-2 text-3xl font-semibold">Appointments</h1>
+        <p className="text-sm font-medium uppercase text-ocean">Nhân viên</p>
+        <h1 className="mt-2 text-3xl font-semibold">Lịch hẹn</h1>
       </header>
 
       {error ? (
@@ -138,39 +138,39 @@ export default function EmployeeAppointmentsPage() {
           }
           value={statusFilter}
         >
-          <option value="all">All statuses</option>
-          <option value="pending">Pending</option>
-          <option value="accepted">Accepted</option>
-          <option value="rejected">Rejected</option>
-          <option value="rescheduled">Rescheduled</option>
-          <option value="cancelled">Cancelled</option>
-          <option value="completed">Completed</option>
+          <option value="all">Tất cả trạng thái</option>
+          <option value="pending">Chờ xử lý</option>
+          <option value="accepted">Đã chấp nhận</option>
+          <option value="rejected">Từ chối</option>
+          <option value="rescheduled">Đã đổi lịch</option>
+          <option value="cancelled">Đã hủy</option>
+          <option value="completed">Hoàn tất</option>
         </select>
         <button
           className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold"
           type="submit"
         >
-          Filter
+          Lọc
         </button>
       </form>
 
       <section className="mt-5 grid gap-6 xl:grid-cols-[1fr_380px]">
         <div className="overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm">
           {isLoading ? (
-            <p className="p-5 text-sm font-medium text-slate-500">Loading...</p>
+            <p className="p-5 text-sm font-medium text-slate-500">Đang tải...</p>
           ) : appointments.length === 0 ? (
             <p className="p-5 text-sm font-medium text-slate-500">
-              No appointments found.
+              Chưa có lịch hẹn.
             </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[820px] text-left text-sm">
                 <thead className="bg-slate-50 text-xs uppercase text-slate-500">
                   <tr>
-                    <th className="px-4 py-3">Schedule</th>
-                    <th className="px-4 py-3">Customer</th>
-                    <th className="px-4 py-3">Duration</th>
-                    <th className="px-4 py-3">Status</th>
+                    <th className="px-4 py-3">Thời gian hẹn</th>
+                    <th className="px-4 py-3">Khách hàng</th>
+                    <th className="px-4 py-3">Thời hạn</th>
+                    <th className="px-4 py-3">Trạng thái</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
@@ -196,7 +196,7 @@ export default function EmployeeAppointmentsPage() {
                         </p>
                       </td>
                       <td className="px-4 py-3">
-                        {appointment.duration_minutes} minutes
+                        {appointment.duration_minutes} phút
                       </td>
                       <td className="px-4 py-3">
                         <AppointmentStatusBadge status={appointment.status} />
@@ -213,7 +213,7 @@ export default function EmployeeAppointmentsPage() {
           className="rounded-md border border-slate-200 bg-white p-5 shadow-sm"
           onSubmit={handleSubmit}
         >
-          <h2 className="text-lg font-semibold">Manage Appointment</h2>
+          <h2 className="text-lg font-semibold">Quản lý lịch hẹn</h2>
           {selectedAppointment ? (
             <div className="mt-5 grid gap-4">
               <p className="text-sm font-medium text-slate-500">
@@ -250,17 +250,17 @@ export default function EmployeeAppointmentsPage() {
                 }
                 value={form.status ?? "pending"}
               >
-                <option value="pending">Pending</option>
-                <option value="accepted">Accepted</option>
-                <option value="rejected">Rejected</option>
-                <option value="rescheduled">Rescheduled</option>
-                <option value="cancelled">Cancelled</option>
-                <option value="completed">Completed</option>
+                <option value="pending">Chờ xử lý</option>
+                <option value="accepted">Đã chấp nhận</option>
+                <option value="rejected">Từ chối</option>
+                <option value="rescheduled">Đã đổi lịch</option>
+                <option value="cancelled">Đã hủy</option>
+                <option value="completed">Hoàn tất</option>
               </select>
               <textarea
                 className="min-h-24 rounded-md border border-slate-300 px-3 py-2"
                 onChange={(event) => setForm({ ...form, note: event.target.value })}
-                placeholder="Note"
+                placeholder="Ghi chú"
                 value={form.note ?? ""}
               />
               <button
@@ -268,12 +268,12 @@ export default function EmployeeAppointmentsPage() {
                 disabled={isSaving}
                 type="submit"
               >
-                {isSaving ? "Saving..." : "Save"}
+                {isSaving ? "Đang lưu..." : "Lưu"}
               </button>
             </div>
           ) : (
             <p className="mt-5 text-sm font-medium text-slate-500">
-              Select an appointment.
+              Chọn một lịch hẹn.
             </p>
           )}
         </form>

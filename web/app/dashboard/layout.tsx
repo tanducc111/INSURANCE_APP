@@ -1,9 +1,10 @@
 import { ProtectedDashboardShell } from "@/components/dashboard/protected-dashboard-shell";
+import type { ReactNode } from "react";
 
 export default function DashboardLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
 }>) {
   return <ProtectedDashboardShell>{children}</ProtectedDashboardShell>;
 }

@@ -2,7 +2,11 @@
 
 import { FormEvent, useEffect, useState } from "react";
 
+import { EmptyState } from "@/components/ui/empty-state";
+import { LoadingState } from "@/components/ui/loading-state";
+import { PageHeader } from "@/components/ui/page-header";
 import { useRoleAccess } from "@/hooks/use-role-access";
+import { formatDateTime } from "@/lib/formatters";
 import { ApiError } from "@/services/api-client";
 import {
   listChatMessages,
@@ -37,7 +41,9 @@ export default function EmployeeChatPage() {
       setRooms(data);
       setSelectedRoomId((current) => current || data[0]?.id || null);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to load rooms");
+      setError(
+        err instanceof ApiError ? err.message : "Không thể tải cuộc trò chuyện",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -55,7 +61,7 @@ export default function EmployeeChatPage() {
       setMessages(data);
       await markChatMessagesRead(token, roomId);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to load messages");
+      setError(err instanceof ApiError ? err.message : "Không thể tải tin nhắn");
     } finally {
       setIsMessagesLoading(false);
     }
@@ -98,22 +104,23 @@ export default function EmployeeChatPage() {
       setContent("");
       await loadMessages(selectedRoomId);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to send message");
+      setError(err instanceof ApiError ? err.message : "Không thể gửi tin nhắn");
     } finally {
       setIsSending(false);
     }
   }
 
   if (!isReady) {
-    return <p className="text-sm font-medium text-slate-600">Loading...</p>;
+    return <LoadingState />;
   }
 
   return (
     <div className="mx-auto max-w-7xl">
-      <header className="border-b border-slate-200 pb-5">
-        <p className="text-sm font-medium uppercase text-ocean">Employee</p>
-        <h1 className="mt-2 text-3xl font-semibold">Customer Chat</h1>
-      </header>
+      <PageHeader
+        description="Theo dõi hội thoại, phản hồi câu hỏi và hỗ trợ khách hàng được phân công."
+        eyebrow="Nhân viên"
+        title="Tin nhắn khách hàng"
+      />
 
       {error ? (
         <p className="mt-6 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
@@ -122,19 +129,17 @@ export default function EmployeeChatPage() {
       ) : null}
 
       <section className="mt-6 grid gap-6 lg:grid-cols-[320px_1fr]">
-        <div className="overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-lg border border-border bg-white shadow-sm">
           {isLoading ? (
-            <p className="p-5 text-sm font-medium text-slate-500">Loading...</p>
+            <LoadingState />
           ) : rooms.length === 0 ? (
-            <p className="p-5 text-sm font-medium text-slate-500">
-              No chat rooms found.
-            </p>
+            <EmptyState title="Chưa có cuộc trò chuyện" />
           ) : (
             <div className="divide-y divide-slate-200">
               {rooms.map((room) => (
                 <button
                   className={`block w-full px-5 py-4 text-left transition ${
-                    selectedRoomId === room.id ? "bg-teal-50" : "hover:bg-slate-50"
+                    selectedRoomId === room.id ? "bg-blue-50" : "hover:bg-slate-50"
                   }`}
                   key={room.id}
                   onClick={() => setSelectedRoomId(room.id)}
@@ -150,19 +155,17 @@ export default function EmployeeChatPage() {
           )}
         </div>
 
-        <section className="rounded-md border border-slate-200 bg-white shadow-sm">
-          <div className="border-b border-slate-200 p-4">
+        <section className="overflow-hidden rounded-lg border border-border bg-white shadow-sm">
+          <div className="border-b border-border p-4">
             <h2 className="text-lg font-semibold">
-              {selectedRoom ? selectedRoom.customer_name : "Conversation"}
+              {selectedRoom ? selectedRoom.customer_name : "Cuộc trò chuyện"}
             </h2>
           </div>
-          <div className="h-[480px] overflow-y-auto p-5">
+          <div className="h-[520px] overflow-y-auto bg-slate-50/70 p-5">
             {isMessagesLoading ? (
-              <p className="text-sm font-medium text-slate-500">Loading...</p>
+              <LoadingState />
             ) : messages.length === 0 ? (
-              <p className="text-sm font-medium text-slate-500">
-                No messages yet.
-              </p>
+              <EmptyState title="Chưa có tin nhắn" />
             ) : (
               <div className="space-y-3">
                 {messages.map((message) => {
@@ -173,16 +176,15 @@ export default function EmployeeChatPage() {
                       key={message.id}
                     >
                       <div
-                        className={`max-w-[75%] rounded-md px-4 py-3 text-sm ${
+                        className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm shadow-sm ${
                           isMine
-                            ? "bg-ocean text-white"
-                            : "border border-slate-200 bg-slate-50 text-slate-700"
+                            ? "rounded-br-md bg-primary text-white"
+                            : "rounded-bl-md border border-border bg-white text-slate-700"
                         }`}
                       >
                         <p>{message.content}</p>
                         <p className="mt-2 text-xs opacity-75">
-                          {message.sender_name} -{" "}
-                          {new Date(message.created_at).toLocaleString()}
+                          {message.sender_name} - {formatDateTime(message.created_at)}
                         </p>
                       </div>
                     </div>
@@ -193,22 +195,22 @@ export default function EmployeeChatPage() {
           </div>
 
           <form
-            className="flex gap-3 border-t border-slate-200 p-4"
+            className="flex gap-3 border-t border-border p-4"
             onSubmit={handleSubmit}
           >
             <input
-              className="flex-1 rounded-md border border-slate-300 px-3 py-2"
+              className="flex-1 rounded-md border border-border px-3 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-blue-100"
               disabled={!selectedRoomId}
               onChange={(event) => setContent(event.target.value)}
-              placeholder="Write a message"
+              placeholder="Nhập tin nhắn"
               value={content}
             />
             <button
-              className="rounded-md bg-ocean px-4 py-2 text-sm font-semibold text-white disabled:bg-slate-300"
+              className="rounded-md bg-primary px-4 py-2 text-sm font-bold text-white disabled:bg-slate-300"
               disabled={isSending || !selectedRoomId || !content.trim()}
               type="submit"
             >
-              {isSending ? "Sending..." : "Send"}
+              {isSending ? "Đang gửi..." : "Gửi"}
             </button>
           </form>
         </section>

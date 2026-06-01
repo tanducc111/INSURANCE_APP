@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 
+import { StatusBadge } from "@/components/ui/status-badge";
 import { useAdminAccess } from "@/hooks/use-admin-access";
 import { ApiError } from "@/services/api-client";
 import {
@@ -50,7 +51,7 @@ export default function AdminAssignmentsPage() {
       setEmployeeId((current) => current || employeeData[0]?.id || 0);
       setCustomerId((current) => current || customerData[0]?.id || 0);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to load assignments");
+      setError(err instanceof ApiError ? err.message : "Không thể tải phân công");
     } finally {
       setIsLoading(false);
     }
@@ -83,7 +84,7 @@ export default function AdminAssignmentsPage() {
       });
       await loadData();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to assign customer");
+      setError(err instanceof ApiError ? err.message : "Không thể phân công khách hàng");
     } finally {
       setIsSaving(false);
     }
@@ -102,20 +103,20 @@ export default function AdminAssignmentsPage() {
       await loadData();
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Unable to update assignment",
+        err instanceof ApiError ? err.message : "Không thể cập nhật phân công",
       );
     }
   }
 
   if (!isReady) {
-    return <p className="text-sm font-medium text-slate-600">Loading...</p>;
+    return <p className="text-sm font-medium text-slate-600">Đang tải...</p>;
   }
 
   return (
     <div className="mx-auto max-w-7xl">
       <header className="border-b border-slate-200 pb-5">
-        <p className="text-sm font-medium uppercase text-ocean">Admin</p>
-        <h1 className="mt-2 text-3xl font-semibold">Assignments</h1>
+        <p className="text-sm font-medium uppercase text-ocean">Quản trị</p>
+        <h1 className="mt-2 text-3xl font-semibold">Phân công khách hàng</h1>
       </header>
 
       {error ? (
@@ -129,7 +130,7 @@ export default function AdminAssignmentsPage() {
           className="rounded-md border border-slate-200 bg-white p-5 shadow-sm"
           onSubmit={handleSubmit}
         >
-          <h2 className="text-lg font-semibold">Assign Customer</h2>
+          <h2 className="text-lg font-semibold">Phân công khách hàng</h2>
           <div className="mt-5 grid gap-4">
             <select
               className="rounded-md border border-slate-300 px-3 py-2"
@@ -138,7 +139,7 @@ export default function AdminAssignmentsPage() {
               value={customerId}
             >
               {customers.length === 0 ? (
-                <option value={0}>No customers</option>
+                <option value={0}>Chưa có khách hàng</option>
               ) : (
                 customers.map((customer) => (
                   <option key={customer.id} value={customer.id}>
@@ -154,7 +155,7 @@ export default function AdminAssignmentsPage() {
               value={employeeId}
             >
               {employees.length === 0 ? (
-                <option value={0}>No employees</option>
+                <option value={0}>Chưa có nhân viên</option>
               ) : (
                 employees.map((employee) => (
                   <option key={employee.id} value={employee.id}>
@@ -168,15 +169,15 @@ export default function AdminAssignmentsPage() {
               onChange={(event) => setStatus(event.target.value as AssignmentStatus)}
               value={status}
             >
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
+              <option value="active">Đang hoạt động</option>
+              <option value="inactive">Ngừng hoạt động</option>
             </select>
             <button
               className="rounded-md bg-ocean px-4 py-2 text-sm font-semibold text-white disabled:bg-slate-300"
               disabled={isSaving || !customerId || !employeeId}
               type="submit"
             >
-              {isSaving ? "Saving..." : "Assign"}
+              {isSaving ? "Đang lưu..." : "Phân công"}
             </button>
           </div>
         </form>
@@ -190,35 +191,35 @@ export default function AdminAssignmentsPage() {
               }
               value={statusFilter}
             >
-              <option value="all">All statuses</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
+              <option value="all">Tất cả trạng thái</option>
+              <option value="active">Đang hoạt động</option>
+              <option value="inactive">Ngừng hoạt động</option>
             </select>
             <button
               className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold"
               type="submit"
             >
-              Filter
+              Lọc
             </button>
           </form>
 
           <div className="mt-5 overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm">
             {isLoading ? (
-              <p className="p-5 text-sm font-medium text-slate-500">Loading...</p>
+              <p className="p-5 text-sm font-medium text-slate-500">Đang tải...</p>
             ) : assignments.length === 0 ? (
               <p className="p-5 text-sm font-medium text-slate-500">
-                No assignments found.
+                Chưa có phân công.
               </p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[720px] text-left text-sm">
                   <thead className="bg-slate-50 text-xs uppercase text-slate-500">
                     <tr>
-                      <th className="px-4 py-3">Customer</th>
-                      <th className="px-4 py-3">Employee</th>
-                      <th className="px-4 py-3">Status</th>
-                      <th className="px-4 py-3">Assigned</th>
-                      <th className="px-4 py-3">Actions</th>
+                      <th className="px-4 py-3">Khách hàng</th>
+                      <th className="px-4 py-3">Nhân viên</th>
+                      <th className="px-4 py-3">Trạng thái</th>
+                      <th className="px-4 py-3">Ngày phân công</th>
+                      <th className="px-4 py-3">Thao tác</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200">
@@ -241,7 +242,7 @@ export default function AdminAssignmentsPage() {
                           </p>
                         </td>
                         <td className="px-4 py-3 capitalize">
-                          {assignment.status}
+                          <StatusBadge value={assignment.status} />
                         </td>
                         <td className="px-4 py-3">
                           {new Date(assignment.created_at).toLocaleDateString()}
@@ -260,8 +261,8 @@ export default function AdminAssignmentsPage() {
                             type="button"
                           >
                             {assignment.status === "active"
-                              ? "Deactivate"
-                              : "Activate"}
+                              ? "Ngừng hoạt động"
+                              : "Kích hoạt"}
                           </button>
                         </td>
                       </tr>

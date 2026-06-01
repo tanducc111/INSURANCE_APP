@@ -1,7 +1,11 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { Bot, FileText, SendHorizontal, Sparkles } from "lucide-react";
 
+import { EmptyState } from "@/components/ui/empty-state";
+import { LoadingState } from "@/components/ui/loading-state";
+import { PageHeader } from "@/components/ui/page-header";
 import { useRoleAccess } from "@/hooks/use-role-access";
 import { ApiError } from "@/services/api-client";
 import { askChatbot } from "@/services/rag-service";
@@ -14,6 +18,12 @@ type ChatEntry = {
   sources: ChatbotSource[];
 };
 
+const suggestedQuestions = [
+  "Processes nộp hồ sơ bồi thường gồm những bước nào?",
+  "Bảo hiểm sức khỏe chi trả những quyền lợi nào?",
+  "Tôi cần chuẩn bị giấy tờ gì khi yêu cầu bồi thường?",
+];
+
 export default function CustomerChatbotPage() {
   const { isReady, token } = useRoleAccess(["CUSTOMER"]);
   const [question, setQuestion] = useState("");
@@ -21,13 +31,12 @@ export default function CustomerChatbotPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!token || !question.trim()) {
+  async function submitQuestion(nextQuestion: string) {
+    if (!token || !nextQuestion.trim()) {
       return;
     }
 
-    const currentQuestion = question.trim();
+    const currentQuestion = nextQuestion.trim();
     setQuestion("");
     setIsLoading(true);
     setError(null);
@@ -36,70 +45,102 @@ export default function CustomerChatbotPage() {
       setEntries((current) => [
         ...current,
         {
+          answer: response.answer,
           id: Date.now(),
           question: currentQuestion,
-          answer: response.answer,
           sources: response.sources,
         },
       ]);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to ask chatbot");
+      setError(
+        err instanceof ApiError
+          ? err.message
+          : "Không thể gửi câu hỏi cho trợ lý AI",
+      );
     } finally {
       setIsLoading(false);
     }
   }
 
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    await submitQuestion(question);
+  }
+
   if (!isReady) {
-    return <p className="text-sm font-medium text-slate-600">Loading...</p>;
+    return <LoadingState />;
   }
 
   return (
     <div className="mx-auto max-w-5xl">
-      <header className="border-b border-slate-200 pb-5">
-        <p className="text-sm font-medium uppercase text-ocean">Customer</p>
-        <h1 className="mt-2 text-3xl font-semibold">Company Chatbot</h1>
-      </header>
+      <PageHeader
+        description="Trợ lý chỉ trả lời dựa trên tài liệu công ty đã được quản trị viên tải lên."
+        eyebrow="Khách hàng"
+        title="Trợ lý bảo hiểm AI"
+      />
 
       {error ? (
-        <p className="mt-6 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+        <p className="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
           {error}
         </p>
       ) : null}
 
-      <section className="mt-6 rounded-md border border-slate-200 bg-white shadow-sm">
-        <div className="min-h-[500px] space-y-5 p-5">
+      <section className="mt-6 overflow-hidden rounded-lg border border-border bg-white shadow-sm">
+        <div className="min-h-[520px] space-y-5 bg-slate-50/70 p-5">
           {entries.length === 0 ? (
-            <p className="text-sm font-medium text-slate-500">
-              Ask a question about uploaded company documents.
-            </p>
+            <div className="space-y-5">
+              <EmptyState
+                description="Chọn một câu hỏi gợi ý hoặc nhập nội dung cần tư vấn về hợp đồng, bồi thường và quyền lợi bảo hiểm."
+                icon={Bot}
+                title="Bạn cần hỗ trợ điều gì?"
+              />
+              <div className="grid gap-3 md:grid-cols-3">
+                {suggestedQuestions.map((item) => (
+                  <button
+                    className="rounded-lg border border-border bg-white p-4 text-left text-sm font-semibold leading-6 text-ink shadow-sm transition hover:border-primary hover:text-primary"
+                    key={item}
+                    onClick={() => void submitQuestion(item)}
+                    type="button"
+                  >
+                    <Sparkles aria-hidden className="mb-3 h-4 w-4 text-primary" />
+                    {item}
+                  </button>
+                ))}
+              </div>
+            </div>
           ) : (
             entries.map((entry) => (
-              <div className="space-y-3" key={entry.id}>
+              <div className="space-y-4" key={entry.id}>
                 <div className="flex justify-end">
-                  <p className="max-w-[80%] rounded-md bg-ocean px-4 py-3 text-sm text-white">
+                  <p className="max-w-[80%] rounded-2xl rounded-br-md bg-primary px-4 py-3 text-sm font-medium leading-6 text-white">
                     {entry.question}
                   </p>
                 </div>
-                <div className="rounded-md border border-slate-200 bg-slate-50 p-4">
+                <div className="max-w-[88%] rounded-2xl rounded-bl-md border border-border bg-white p-4 shadow-sm">
+                  <div className="mb-3 flex items-center gap-2 text-sm font-bold text-primary">
+                    <Bot aria-hidden className="h-4 w-4" />
+                    Trợ lý bảo hiểm AI
+                  </div>
                   <p className="whitespace-pre-line text-sm leading-6 text-slate-700">
                     {entry.answer}
                   </p>
                   {entry.sources.length > 0 ? (
-                    <div className="mt-4 border-t border-slate-200 pt-4">
-                      <p className="text-xs font-semibold uppercase text-slate-500">
-                        Sources
+                    <div className="mt-4 border-t border-border pt-4">
+                      <p className="text-xs font-bold uppercase tracking-normal text-muted">
+                        Nguồn tham khảo
                       </p>
                       <div className="mt-3 space-y-2">
                         {entry.sources.map((source) => (
                           <div
-                            className="rounded-md border border-slate-200 bg-white p-3"
+                            className="rounded-lg border border-border bg-slate-50 p-3"
                             key={`${source.document_id}-${source.chunk_id}`}
                           >
-                            <p className="text-sm font-semibold">
+                            <p className="flex items-center gap-2 text-sm font-bold">
+                              <FileText aria-hidden className="h-4 w-4 text-primary" />
                               {source.document_title}
                             </p>
-                            <p className="mt-1 text-xs text-slate-500">
-                              Chunk {source.chunk_index + 1} - score{" "}
+                            <p className="mt-1 text-xs text-muted">
+                              Đoạn {source.chunk_index + 1} - điểm liên quan{" "}
                               {source.score}
                             </p>
                             <p className="mt-2 text-sm leading-6 text-slate-600">
@@ -115,26 +156,29 @@ export default function CustomerChatbotPage() {
             ))
           )}
           {isLoading ? (
-            <p className="text-sm font-medium text-slate-500">Thinking...</p>
+            <div className="inline-flex rounded-full border border-border bg-white px-4 py-2 text-sm font-semibold text-muted shadow-sm">
+              Trợ lý đang soạn trả lời...
+            </div>
           ) : null}
         </div>
 
         <form
-          className="flex gap-3 border-t border-slate-200 p-4"
+          className="flex gap-3 border-t border-border bg-white p-4"
           onSubmit={handleSubmit}
         >
           <input
-            className="flex-1 rounded-md border border-slate-300 px-3 py-2"
+            className="flex-1 rounded-md border border-border px-3 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-blue-100"
             onChange={(event) => setQuestion(event.target.value)}
-            placeholder="Ask from company documents"
+            placeholder="Nhập câu hỏi từ tài liệu công ty"
             value={question}
           />
           <button
-            className="rounded-md bg-ocean px-4 py-2 text-sm font-semibold text-white disabled:bg-slate-300"
+            className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-bold text-white disabled:bg-slate-300"
             disabled={isLoading || !question.trim()}
             type="submit"
           >
-            {isLoading ? "Asking..." : "Ask"}
+            <SendHorizontal aria-hidden className="h-4 w-4" />
+            {isLoading ? "Đang hỏi..." : "Gửi"}
           </button>
         </form>
       </section>

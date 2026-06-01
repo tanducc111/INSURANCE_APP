@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Bar,
   BarChart,
@@ -13,7 +13,21 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import {
+  BriefcaseBusiness,
+  CalendarCheck2,
+  ClipboardList,
+  FileCheck2,
+  PackageCheck,
+  UsersRound,
+} from "lucide-react";
 
+import { ChartCard } from "@/components/ui/chart-card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { KpiCard } from "@/components/ui/kpi-card";
+import { LoadingState } from "@/components/ui/loading-state";
+import { PageHeader } from "@/components/ui/page-header";
+import { StatusBadge, statusLabel } from "@/components/ui/status-badge";
 import { getStoredToken, getStoredUser } from "@/lib/auth-storage";
 import { ApiError } from "@/services/api-client";
 import {
@@ -28,16 +42,7 @@ import type {
   EmployeeDashboardStats,
 } from "@/types/subscription";
 
-const chartColors = ["#0f766e", "#b7791f", "#3b82f6", "#64748b"];
-
-function StatCard({ label, value }: { label: string; value: number | string }) {
-  return (
-    <div className="rounded-md border border-slate-200 bg-white p-5 shadow-sm">
-      <p className="text-xs font-semibold uppercase text-slate-500">{label}</p>
-      <p className="mt-3 text-3xl font-semibold">{value}</p>
-    </div>
-  );
-}
+const chartColors = ["#2563EB", "#0EA5E9", "#10B981", "#F59E0B", "#EF4444"];
 
 export default function DashboardPage() {
   const [role, setRole] = useState<UserRole | null>(null);
@@ -69,7 +74,11 @@ export default function DashboardPage() {
           setCustomerStats(await getCustomerDashboard(token));
         }
       } catch (err) {
-        setError(err instanceof ApiError ? err.message : "Unable to load dashboard");
+        setError(
+          err instanceof ApiError
+            ? err.message
+            : "Không thể tải bảng điều khiển",
+        );
       } finally {
         setIsLoading(false);
       }
@@ -78,13 +87,22 @@ export default function DashboardPage() {
     void loadDashboard();
   }, []);
 
+  const subscriptionChart = useMemo(
+    () =>
+      adminStats?.subscription_status_chart.map((item) => ({
+        ...item,
+        label: statusLabel(item.label),
+      })) ?? [],
+    [adminStats],
+  );
+
   if (isLoading) {
-    return <p className="text-sm font-medium text-slate-600">Loading...</p>;
+    return <LoadingState />;
   }
 
   if (error) {
     return (
-      <p className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+      <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
         {error}
       </p>
     );
@@ -92,48 +110,77 @@ export default function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-7xl">
-      <header className="border-b border-slate-200 pb-5">
-        <p className="text-sm font-medium uppercase text-ocean">Dashboard</p>
-        <h1 className="mt-2 text-3xl font-semibold">Overview</h1>
-      </header>
+      <PageHeader
+        description="Theo dõi nhanh dữ liệu vận hành, hiệu suất xử lý và tình trạng hợp đồng theo từng vai trò."
+        eyebrow="Tổng quan"
+        title="Bảng điều khiển"
+      />
 
       {role === "ADMIN" && adminStats ? (
         <section className="mt-6 space-y-6">
-          <div className="grid gap-4 md:grid-cols-4 xl:grid-cols-7">
-            <StatCard label="Customers" value={adminStats.total_customers} />
-            <StatCard label="Employees" value={adminStats.total_employees} />
-            <StatCard label="Packages" value={adminStats.total_packages} />
-            <StatCard
-              label="Active subs"
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <KpiCard
+              icon={UsersRound}
+              label="Tổng khách hàng"
+              value={adminStats.total_customers}
+            />
+            <KpiCard
+              icon={BriefcaseBusiness}
+              label="Tổng nhân viên"
+              tone="cyan"
+              value={adminStats.total_employees}
+            />
+            <KpiCard
+              icon={PackageCheck}
+              label="Gói bảo hiểm"
+              tone="green"
+              value={adminStats.total_packages}
+            />
+            <KpiCard
+              icon={FileCheck2}
+              label="Hợp đồng hiệu lực"
+              tone="green"
               value={adminStats.active_subscriptions}
             />
-            <StatCard
-              label="Pending subs"
+            <KpiCard
+              icon={FileCheck2}
+              label="Hợp đồng chờ xử lý"
+              tone="amber"
               value={adminStats.pending_subscriptions}
             />
-            <StatCard label="Open claims" value={adminStats.open_claims} />
-            <StatCard label="Approved claims" value={adminStats.approved_claims} />
+            <KpiCard
+              icon={ClipboardList}
+              label="Bồi thường đang mở"
+              tone="amber"
+              value={adminStats.open_claims}
+            />
+            <KpiCard
+              icon={ClipboardList}
+              label="Bồi thường đã duyệt"
+              tone="green"
+              value={adminStats.approved_claims}
+            />
           </div>
 
           <div className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-md border border-slate-200 bg-white p-5 shadow-sm">
-              <h2 className="text-lg font-semibold">Subscription Status</h2>
-              {adminStats.subscription_status_chart.length === 0 ? (
-                <p className="mt-5 text-sm font-medium text-slate-500">
-                  No chart data available.
-                </p>
+            <ChartCard
+              description="Tỷ trọng hợp đồng theo từng trạng thái nghiệp vụ."
+              title="Trạng thái hợp đồng"
+            >
+              {subscriptionChart.length === 0 ? (
+                <EmptyState title="Chưa có dữ liệu biểu đồ" />
               ) : (
-                <div className="mt-5 h-72">
+                <div className="h-72">
                   <ResponsiveContainer height="100%" width="100%">
                     <PieChart>
                       <Pie
-                        data={adminStats.subscription_status_chart}
+                        data={subscriptionChart}
                         dataKey="value"
-                        innerRadius={55}
+                        innerRadius={58}
                         nameKey="label"
-                        outerRadius={95}
+                        outerRadius={96}
                       >
-                        {adminStats.subscription_status_chart.map((entry, index) => (
+                        {subscriptionChart.map((entry, index) => (
                           <Cell
                             fill={chartColors[index % chartColors.length]}
                             key={entry.label}
@@ -145,78 +192,114 @@ export default function DashboardPage() {
                   </ResponsiveContainer>
                 </div>
               )}
-            </div>
+            </ChartCard>
 
-            <div className="rounded-md border border-slate-200 bg-white p-5 shadow-sm">
-              <h2 className="text-lg font-semibold">Package Registrations</h2>
+            <ChartCard
+              description="Số lượt đăng ký theo từng gói bảo hiểm."
+              title="Đăng ký theo gói"
+            >
               {adminStats.package_registration_chart.length === 0 ? (
-                <p className="mt-5 text-sm font-medium text-slate-500">
-                  No chart data available.
-                </p>
+                <EmptyState title="Chưa có dữ liệu biểu đồ" />
               ) : (
-                <div className="mt-5 h-72">
+                <div className="h-72">
                   <ResponsiveContainer height="100%" width="100%">
                     <BarChart data={adminStats.package_registration_chart}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="label" />
-                      <YAxis allowDecimals={false} />
+                      <CartesianGrid stroke="#E2E8F0" strokeDasharray="3 3" />
+                      <XAxis dataKey="label" tick={{ fontSize: 12 }} />
+                      <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
                       <Tooltip />
-                      <Bar dataKey="value" fill="#0f766e" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="value" fill="#2563EB" radius={[6, 6, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
               )}
-            </div>
+            </ChartCard>
           </div>
         </section>
       ) : null}
 
       {role === "EMPLOYEE" && employeeStats ? (
-        <section className="mt-6 grid gap-4 md:grid-cols-4">
-          <StatCard
-            label="Assigned customers"
+        <section className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <KpiCard
+            icon={UsersRound}
+            label="Khách hàng được phân công"
             value={employeeStats.assigned_customers_count}
           />
-          <StatCard
-            label="Active subs"
+          <KpiCard
+            icon={FileCheck2}
+            label="Hợp đồng hiệu lực"
+            tone="green"
             value={employeeStats.active_subscriptions_count}
           />
-          <StatCard label="Pending follow-ups" value={employeeStats.pending_follow_ups} />
-          <StatCard label="Open claims" value={employeeStats.open_claims_count} />
+          <KpiCard
+            icon={CalendarCheck2}
+            label="Công việc cần theo dõi"
+            tone="amber"
+            value={employeeStats.pending_follow_ups}
+          />
+          <KpiCard
+            icon={ClipboardList}
+            label="Bồi thường chờ xử lý"
+            tone="red"
+            value={employeeStats.open_claims_count}
+          />
         </section>
       ) : null}
 
       {role === "CUSTOMER" && customerStats ? (
         <section className="mt-6 space-y-6">
-          <div className="grid gap-4 md:grid-cols-4">
-            <StatCard label="Active packages" value={customerStats.active_packages} />
-            <StatCard label="Expired packages" value={customerStats.expired_packages} />
-            <StatCard label="Open claims" value={customerStats.open_claims} />
-            <StatCard
-              label="Assigned employee"
-              value={customerStats.assigned_employee?.full_name ?? "Unassigned"}
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <KpiCard
+              icon={FileCheck2}
+              label="Hợp đồng đang hiệu lực"
+              tone="green"
+              value={customerStats.active_packages}
+            />
+            <KpiCard
+              icon={FileCheck2}
+              label="Hợp đồng hết hạn"
+              value={customerStats.expired_packages}
+            />
+            <KpiCard
+              icon={ClipboardList}
+              label="Hồ sơ bồi thường"
+              tone="amber"
+              value={customerStats.open_claims}
+            />
+            <KpiCard
+              icon={BriefcaseBusiness}
+              label="Nhân viên phụ trách"
+              value={customerStats.assigned_employee?.full_name ?? "Chưa phân công"}
             />
           </div>
 
-          <div className="rounded-md border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 className="text-lg font-semibold">Latest Subscriptions</h2>
+          <ChartCard title="Hợp đồng gần đây">
             {customerStats.latest_subscriptions.length === 0 ? (
-              <p className="mt-5 text-sm font-medium text-slate-500">
-                No subscriptions found.
-              </p>
+              <EmptyState
+                description="Khi hợp đồng được phát hành, danh sách mới nhất sẽ hiển thị tại đây."
+                title="Chưa có hợp đồng"
+              />
             ) : (
-              <div className="mt-5 divide-y divide-slate-200">
+              <div className="divide-y divide-border">
                 {customerStats.latest_subscriptions.map((subscription) => (
-                  <div className="py-3" key={subscription.id}>
-                    <p className="font-semibold">{subscription.package_name}</p>
-                    <p className="mt-1 text-sm capitalize text-slate-500">
-                      {subscription.policy_number} - {subscription.status}
-                    </p>
+                  <div
+                    className="flex flex-col gap-3 py-4 md:flex-row md:items-center md:justify-between"
+                    key={subscription.id}
+                  >
+                    <div>
+                      <p className="font-bold text-ink">
+                        {subscription.package_name}
+                      </p>
+                      <p className="mt-1 text-sm text-muted">
+                        Số hợp đồng: {subscription.policy_number}
+                      </p>
+                    </div>
+                    <StatusBadge value={subscription.status} />
                   </div>
                 ))}
               </div>
             )}
-          </div>
+          </ChartCard>
         </section>
       ) : null}
     </div>

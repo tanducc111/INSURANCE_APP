@@ -34,7 +34,7 @@ export default function CustomerAppointmentsPage() {
       );
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Unable to load appointments",
+        err instanceof ApiError ? err.message : "Không thể tải lịch hẹn",
       );
     } finally {
       setIsLoading(false);
@@ -53,20 +53,20 @@ export default function CustomerAppointmentsPage() {
   }
 
   if (!isReady) {
-    return <p className="text-sm font-medium text-slate-600">Loading...</p>;
+    return <p className="text-sm font-medium text-slate-600">Đang tải...</p>;
   }
 
   return (
     <div className="mx-auto max-w-6xl">
       <header className="border-b border-slate-200 pb-5">
-        <p className="text-sm font-medium uppercase text-ocean">Customer</p>
+        <p className="text-sm font-medium uppercase text-ocean">Khách hàng</p>
         <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-3xl font-semibold">My Appointments</h1>
+          <h1 className="text-3xl font-semibold">Lịch hẹn của tôi</h1>
           <Link
             className="rounded-md bg-ocean px-4 py-2 text-sm font-semibold text-white"
             href="/dashboard/customer/book-appointment"
           >
-            Book Appointment
+            Đặt lịch hẹn
           </Link>
         </div>
       </header>
@@ -85,39 +85,39 @@ export default function CustomerAppointmentsPage() {
           }
           value={statusFilter}
         >
-          <option value="all">All statuses</option>
-          <option value="pending">Pending</option>
-          <option value="accepted">Accepted</option>
-          <option value="rejected">Rejected</option>
-          <option value="rescheduled">Rescheduled</option>
-          <option value="cancelled">Cancelled</option>
-          <option value="completed">Completed</option>
+          <option value="all">Tất cả trạng thái</option>
+          <option value="pending">Chờ xử lý</option>
+          <option value="accepted">Đã chấp nhận</option>
+          <option value="rejected">Từ chối</option>
+          <option value="rescheduled">Đã đổi lịch</option>
+          <option value="cancelled">Đã hủy</option>
+          <option value="completed">Hoàn tất</option>
         </select>
         <button
           className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold"
           type="submit"
         >
-          Filter
+          Lọc
         </button>
       </form>
 
       <section className="mt-5 overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm">
         {isLoading ? (
-          <p className="p-5 text-sm font-medium text-slate-500">Loading...</p>
+          <p className="p-5 text-sm font-medium text-slate-500">Đang tải...</p>
         ) : appointments.length === 0 ? (
           <p className="p-5 text-sm font-medium text-slate-500">
-            No appointments found.
+            Chưa có lịch hẹn.
           </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px] text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase text-slate-500">
                 <tr>
-                  <th className="px-4 py-3">Schedule</th>
-                  <th className="px-4 py-3">Employee</th>
-                  <th className="px-4 py-3">Duration</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Note</th>
+                    <th className="px-4 py-3">Thời gian hẹn</th>
+                  <th className="px-4 py-3">Nhân viên</th>
+                  <th className="px-4 py-3">Thời hạn</th>
+                  <th className="px-4 py-3">Trạng thái</th>
+                  <th className="px-4 py-3">Ghi chú</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">
@@ -130,13 +130,13 @@ export default function CustomerAppointmentsPage() {
                       {appointment.employee_name}
                     </td>
                     <td className="px-4 py-3">
-                      {appointment.duration_minutes} minutes
+                      {appointment.duration_minutes} phút
                     </td>
                     <td className="px-4 py-3">
                       <AppointmentStatusBadge status={appointment.status} />
                     </td>
                     <td className="px-4 py-3">
-                      {appointment.note || "No note"}
+                      {appointment.note || "Chưa có ghi chú"}
                     </td>
                   </tr>
                 ))}

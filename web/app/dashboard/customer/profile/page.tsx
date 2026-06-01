@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { StatusBadge } from "@/components/ui/status-badge";
 import { useRoleAccess } from "@/hooks/use-role-access";
 import { ApiError } from "@/services/api-client";
 import {
@@ -33,7 +34,7 @@ export default function CustomerProfilePage() {
         setProfile(profileData);
         setEmployee(employeeData);
       } catch (err) {
-        setError(err instanceof ApiError ? err.message : "Unable to load profile");
+        setError(err instanceof ApiError ? err.message : "Không thể tải hồ sơ cá nhân");
       } finally {
         setIsLoading(false);
       }
@@ -45,13 +46,13 @@ export default function CustomerProfilePage() {
   }, [isReady, token]);
 
   if (!isReady || isLoading) {
-    return <p className="text-sm font-medium text-slate-600">Loading...</p>;
+    return <p className="text-sm font-medium text-slate-600">Đang tải...</p>;
   }
 
   if (error || !profile) {
     return (
       <p className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-        {error ?? "Customer profile not found"}
+        {error ?? "Không tìm thấy hồ sơ khách hàng"}
       </p>
     );
   }
@@ -59,47 +60,47 @@ export default function CustomerProfilePage() {
   return (
     <div className="mx-auto max-w-5xl">
       <header className="border-b border-slate-200 pb-5">
-        <p className="text-sm font-medium uppercase text-ocean">Customer</p>
-        <h1 className="mt-2 text-3xl font-semibold">My Profile</h1>
+        <p className="text-sm font-medium uppercase text-ocean">Khách hàng</p>
+        <h1 className="mt-2 text-3xl font-semibold">Hồ sơ của tôi</h1>
       </header>
 
       <section className="mt-6 grid gap-4 md:grid-cols-3">
         <div className="rounded-md border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase text-slate-500">Name</p>
+          <p className="text-xs font-semibold uppercase text-slate-500">Tên</p>
           <p className="mt-2 font-semibold">{profile.full_name}</p>
         </div>
         <div className="rounded-md border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase text-slate-500">Code</p>
+          <p className="text-xs font-semibold uppercase text-slate-500">Mã khách hàng</p>
           <p className="mt-2 font-semibold">{profile.customer_code}</p>
         </div>
         <div className="rounded-md border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase text-slate-500">Status</p>
-          <p className="mt-2 font-semibold capitalize">{profile.status}</p>
+          <p className="text-xs font-semibold uppercase text-slate-500">Trạng thái</p>
+          <div className="mt-2"><StatusBadge value={profile.status} /></div>
         </div>
       </section>
 
       <section className="mt-6 rounded-md border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="text-lg font-semibold">Contact Details</h2>
+        <h2 className="text-lg font-semibold">Thông tin liên hệ</h2>
         <div className="mt-4 grid gap-3 text-sm text-slate-600 md:grid-cols-2">
           <p>Email: {profile.email}</p>
-          <p>Date of birth: {profile.date_of_birth || "Not provided"}</p>
-          <p>Identity: {profile.identity_number || "Not provided"}</p>
-          <p>Address: {profile.address || "Not provided"}</p>
+          <p>Ngày sinh: {profile.date_of_birth || "Chưa cung cấp"}</p>
+          <p>Số CCCD/CMND: {profile.identity_number || "Chưa cung cấp"}</p>
+          <p>Địa chỉ: {profile.address || "Chưa cung cấp"}</p>
         </div>
       </section>
 
       <section className="mt-6 rounded-md border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="text-lg font-semibold">Assigned Employee</h2>
+        <h2 className="text-lg font-semibold">Nhân viên phụ trách</h2>
         {employee ? (
           <div className="mt-4 grid gap-3 text-sm text-slate-600 md:grid-cols-2">
-            <p>Name: {employee.full_name}</p>
+            <p>Họ và tên: {employee.full_name}</p>
             <p>Email: {employee.email}</p>
-            <p>Code: {employee.employee_code}</p>
-            <p>Department: {employee.department || "Not provided"}</p>
+            <p>Mã: {employee.employee_code}</p>
+            <p>Phòng ban: {employee.department || "Chưa cung cấp"}</p>
           </div>
         ) : (
           <p className="mt-4 text-sm font-medium text-slate-500">
-            No employee assigned yet.
+            Chưa có nhân viên phụ trách.
           </p>
         )}
       </section>

@@ -2,7 +2,11 @@
 
 import { FormEvent, useEffect, useState } from "react";
 
+import { EmptyState } from "@/components/ui/empty-state";
+import { LoadingState } from "@/components/ui/loading-state";
+import { PageHeader } from "@/components/ui/page-header";
 import { useRoleAccess } from "@/hooks/use-role-access";
+import { formatDateTime } from "@/lib/formatters";
 import { ApiError } from "@/services/api-client";
 import {
   getCustomerChatRoom,
@@ -30,7 +34,7 @@ export default function CustomerChatPage() {
       setMessages(data);
       await markChatMessagesRead(token, roomId);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to load messages");
+      setError(err instanceof ApiError ? err.message : "Không thể tải tin nhắn");
     }
   }
 
@@ -47,7 +51,9 @@ export default function CustomerChatPage() {
         setRoom(roomData);
         await loadMessages(roomData.id);
       } catch (err) {
-        setError(err instanceof ApiError ? err.message : "Unable to load chat");
+        setError(
+          err instanceof ApiError ? err.message : "Không thể tải cuộc trò chuyện",
+        );
       } finally {
         setIsLoading(false);
       }
@@ -81,27 +87,27 @@ export default function CustomerChatPage() {
       setContent("");
       await loadMessages(room.id);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to send message");
+      setError(err instanceof ApiError ? err.message : "Không thể gửi tin nhắn");
     } finally {
       setIsSending(false);
     }
   }
 
   if (!isReady || isLoading) {
-    return <p className="text-sm font-medium text-slate-600">Loading...</p>;
+    return <LoadingState />;
   }
 
   return (
     <div className="mx-auto max-w-5xl">
-      <header className="border-b border-slate-200 pb-5">
-        <p className="text-sm font-medium uppercase text-ocean">Customer</p>
-        <h1 className="mt-2 text-3xl font-semibold">Chat</h1>
-        {room ? (
-          <p className="mt-2 text-sm font-medium text-slate-500">
-            Assigned employee: {room.employee_name}
-          </p>
-        ) : null}
-      </header>
+      <PageHeader
+        description={
+          room
+            ? `Nhân viên phụ trách: ${room.employee_name}`
+            : "Trao đổi trực tiếp với nhân viên phụ trách."
+        }
+        eyebrow="Khách hàng"
+        title="Chat hỗ trợ"
+      />
 
       {error ? (
         <p className="mt-6 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
@@ -109,12 +115,10 @@ export default function CustomerChatPage() {
         </p>
       ) : null}
 
-      <section className="mt-6 rounded-md border border-slate-200 bg-white shadow-sm">
-        <div className="h-[520px] overflow-y-auto p-5">
+      <section className="mt-6 overflow-hidden rounded-lg border border-border bg-white shadow-sm">
+        <div className="h-[560px] overflow-y-auto bg-slate-50/70 p-5">
           {messages.length === 0 ? (
-            <p className="text-sm font-medium text-slate-500">
-              No messages yet.
-            </p>
+            <EmptyState title="Chưa có tin nhắn" />
           ) : (
             <div className="space-y-3">
               {messages.map((message) => {
@@ -125,16 +129,15 @@ export default function CustomerChatPage() {
                     key={message.id}
                   >
                     <div
-                      className={`max-w-[75%] rounded-md px-4 py-3 text-sm ${
+                      className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm shadow-sm ${
                         isMine
-                          ? "bg-ocean text-white"
-                          : "border border-slate-200 bg-slate-50 text-slate-700"
+                          ? "rounded-br-md bg-primary text-white"
+                          : "rounded-bl-md border border-border bg-white text-slate-700"
                       }`}
                     >
                       <p>{message.content}</p>
                       <p className="mt-2 text-xs opacity-75">
-                        {message.sender_name} -{" "}
-                        {new Date(message.created_at).toLocaleString()}
+                        {message.sender_name} - {formatDateTime(message.created_at)}
                       </p>
                     </div>
                   </div>
@@ -145,21 +148,21 @@ export default function CustomerChatPage() {
         </div>
 
         <form
-          className="flex gap-3 border-t border-slate-200 p-4"
+          className="flex gap-3 border-t border-border p-4"
           onSubmit={handleSubmit}
         >
           <input
-            className="flex-1 rounded-md border border-slate-300 px-3 py-2"
+            className="flex-1 rounded-md border border-border px-3 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-blue-100"
             onChange={(event) => setContent(event.target.value)}
-            placeholder="Write a message"
+            placeholder="Nhập tin nhắn"
             value={content}
           />
           <button
-            className="rounded-md bg-ocean px-4 py-2 text-sm font-semibold text-white disabled:bg-slate-300"
+            className="rounded-md bg-primary px-4 py-2 text-sm font-bold text-white disabled:bg-slate-300"
             disabled={isSending || !content.trim()}
             type="submit"
           >
-            {isSending ? "Sending..." : "Send"}
+            {isSending ? "Đang gửi..." : "Gửi"}
           </button>
         </form>
       </section>
