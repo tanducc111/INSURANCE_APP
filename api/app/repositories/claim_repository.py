@@ -114,6 +114,47 @@ class ClaimRepository:
         return claim
 
 
+class ClaimAttachmentRepository:
+    @staticmethod
+    def list_for_claim(db: Session, claim_id: int) -> list[ClaimAttachment]:
+        return list(
+            db.scalars(
+                select(ClaimAttachment)
+                .where(ClaimAttachment.claim_id == claim_id)
+                .order_by(ClaimAttachment.created_at.desc())
+            )
+        )
+
+    @staticmethod
+    def get_by_id(db: Session, attachment_id: int) -> ClaimAttachment | None:
+        return db.get(ClaimAttachment, attachment_id)
+
+    @staticmethod
+    def create_attachment(
+        db: Session,
+        *,
+        claim_id: int,
+        file_name: str,
+        file_url: str,
+        mime_type: str,
+        file_size: int,
+    ) -> ClaimAttachment:
+        attachment = ClaimAttachment(
+            claim_id=claim_id,
+            file_name=file_name,
+            file_url=file_url,
+            mime_type=mime_type,
+            file_size=file_size,
+        )
+        db.add(attachment)
+        db.flush()
+        return attachment
+
+    @staticmethod
+    def delete_attachment(db: Session, attachment: ClaimAttachment) -> None:
+        db.delete(attachment)
+
+
 class ClaimDashboardRepository:
     @staticmethod
     def count_claims(

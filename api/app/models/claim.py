@@ -1,7 +1,7 @@
 import enum
 from datetime import date
 
-from sqlalchemy import Date, Enum as SAEnum, ForeignKey, String, Text
+from sqlalchemy import Date, Enum as SAEnum, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, IDMixin, TimestampMixin
@@ -134,5 +134,6 @@ class ClaimAttachment(IDMixin, TimestampMixin, Base):
     file_name: Mapped[str] = mapped_column(String(255), nullable=False)
     file_url: Mapped[str] = mapped_column(String(500), nullable=False)
     mime_type: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    file_size: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     claim = relationship("Claim", back_populates="attachments")

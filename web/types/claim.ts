@@ -14,6 +14,7 @@ export type ClaimAttachmentPayload = {
   file_name: string;
   file_url: string;
   mime_type?: string | null;
+  file_size?: number | null;
 };
 
 export type ClaimAttachment = ClaimAttachmentPayload & {

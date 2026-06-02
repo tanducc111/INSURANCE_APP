@@ -4,20 +4,25 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { ClaimAttachments } from "@/components/claims/claim-attachments";
 import {
   ClaimStatusBadge,
   formatClaimLabel,
 } from "@/components/claims/claim-status-badge";
 import { useRoleAccess } from "@/hooks/use-role-access";
 import { ApiError } from "@/services/api-client";
-import { getCustomerClaim } from "@/services/claim-service";
-import type { Claim } from "@/types/claim";
+import {
+  deleteCustomerClaimAttachment,
+  getCustomerClaim,
+} from "@/services/claim-service";
+import type { Claim, ClaimAttachment } from "@/types/claim";
 
 export default function CustomerClaimDetailPage() {
   const { claimId } = useParams<{ claimId: string }>();
   const { isReady, token } = useRoleAccess(["CUSTOMER"]);
   const [claim, setClaim] = useState<Claim | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -31,7 +36,11 @@ export default function CustomerClaimDetailPage() {
       try {
         setClaim(await getCustomerClaim(token, Number(claimId)));
       } catch (err) {
-        setError(err instanceof ApiError ? err.message : "Không thể tải hồ sơ bồi thường");
+        setError(
+          err instanceof ApiError
+            ? err.message
+            : "Không thể tải hồ sơ bồi thường",
+        );
       } finally {
         setIsLoading(false);
       }
@@ -41,6 +50,28 @@ export default function CustomerClaimDetailPage() {
       void loadClaim();
     }
   }, [claimId, isReady, token]);
+
+  async function handleDeleteAttachment(attachment: ClaimAttachment) {
+    if (!token || !claim) {
+      return;
+    }
+
+    setIsDeleting(true);
+    setError(null);
+    try {
+      await deleteCustomerClaimAttachment(token, claim.id, attachment.id);
+      setClaim({
+        ...claim,
+        attachments: claim.attachments.filter(
+          (current) => current.id !== attachment.id,
+        ),
+      });
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Không thể xóa tệp đính kèm");
+    } finally {
+      setIsDeleting(false);
+    }
+  }
 
   if (!isReady || isLoading) {
     return <p className="text-sm font-medium text-slate-600">Đang tải...</p>;
@@ -60,7 +91,7 @@ export default function CustomerClaimDetailPage() {
         className="text-sm font-semibold text-ocean hover:text-teal-800"
         href="/dashboard/customer/claims"
       >
-          Quay lại hồ sơ bồi thường
+        Quay lại hồ sơ bồi thường
       </Link>
 
       <header className="mt-5 border-b border-slate-200 pb-5">
@@ -84,14 +115,18 @@ export default function CustomerClaimDetailPage() {
         </div>
         <div className="rounded-md border border-slate-200 bg-white p-4">
           <p className="text-xs font-semibold uppercase text-slate-500">Ưu tiên</p>
-          <p className="mt-2 font-semibold capitalize">{claim.priority}</p>
+          <p className="mt-2 font-semibold capitalize">{formatClaimLabel(claim.priority)}</p>
         </div>
         <div className="rounded-md border border-slate-200 bg-white p-4">
-          <p className="text-xs font-semibold uppercase text-slate-500">Ngày</p>
+          <p className="text-xs font-semibold uppercase text-slate-500">
+            Ngày xảy ra
+          </p>
           <p className="mt-2 font-semibold">{claim.incident_date}</p>
         </div>
         <div className="rounded-md border border-slate-200 bg-white p-4">
-          <p className="text-xs font-semibold uppercase text-slate-500">Nhân viên</p>
+          <p className="text-xs font-semibold uppercase text-slate-500">
+            Nhân viên
+          </p>
           <p className="mt-2 font-semibold">
             {claim.assigned_employee_name ?? "Chưa phân công"}
           </p>
@@ -104,36 +139,33 @@ export default function CustomerClaimDetailPage() {
           {claim.description}
         </p>
         <p className="mt-4 text-sm font-medium text-slate-500">
-          Location: {claim.location || "Chưa cung cấp"}
+          Địa điểm: {claim.location || "Chưa cung cấp"}
         </p>
       </section>
 
       <section className="mt-6 rounded-md border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="text-lg font-semibold">Review Note</h2>
+        <h2 className="text-lg font-semibold">Ghi chú thẩm định</h2>
         <p className="mt-3 text-sm leading-6 text-slate-700">
-          {claim.review_note || "No review note yet."}
+          {claim.review_note || "Chưa có ghi chú thẩm định."}
         </p>
       </section>
 
       <section className="mt-6 rounded-md border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="text-lg font-semibold">Tệp đính kèm</h2>
-        {claim.attachments.length === 0 ? (
-          <p className="mt-3 text-sm font-medium text-slate-500">
-            Chưa có tệp đính kèm.
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold">Tệp đính kèm</h2>
+          <p className="text-xs font-medium text-slate-500">
+            Hóa đơn viện phí, ảnh tai nạn, biên lai sửa chữa hoặc giấy tờ liên quan
           </p>
-        ) : (
-          <div className="mt-4 divide-y divide-slate-200">
-            {claim.attachments.map((attachment) => (
-              <a
-                className="block py-3 text-sm font-semibold text-ocean"
-                href={attachment.file_url}
-                key={attachment.id}
-              >
-                {attachment.file_name}
-              </a>
-            ))}
-          </div>
-        )}
+        </div>
+        <ClaimAttachments
+          attachments={claim.attachments}
+          isDeleting={isDeleting}
+          onDelete={
+            claim.status === "pending" || claim.status === "need_more_documents"
+              ? handleDeleteAttachment
+              : undefined
+          }
+        />
       </section>
     </div>
   );

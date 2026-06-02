@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, File, Query, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.core.auth import require_roles
@@ -7,6 +7,7 @@ from app.models.claim import Claim, ClaimIncidentType, ClaimPriority, ClaimStatu
 from app.models.user import User, UserRole
 from app.schemas.claim import (
     ClaimAssignmentUpdate,
+    ClaimAttachmentRead,
     ClaimCreate,
     ClaimRead,
     ClaimReviewNoteUpdate,
@@ -64,6 +65,58 @@ async def get_customer_claim(
     return ClaimService.get_customer_claim(
         db,
         claim_id=claim_id,
+        actor=current_customer,
+    )
+
+
+@router.post(
+    "/customer/claims/{claim_id}/attachments",
+    response_model=list[ClaimAttachmentRead],
+    status_code=status.HTTP_201_CREATED,
+)
+async def upload_customer_claim_attachments(
+    claim_id: int,
+    files: list[UploadFile] = File(...),
+    db: Session = Depends(get_db),
+    current_customer: User = Depends(require_roles(UserRole.CUSTOMER)),
+):
+    return await ClaimService.upload_customer_attachments(
+        db,
+        claim_id=claim_id,
+        files=files,
+        actor=current_customer,
+    )
+
+
+@router.get("/claims/{claim_id}/attachments", response_model=list[ClaimAttachmentRead])
+async def list_claim_attachments(
+    claim_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_roles(UserRole.ADMIN, UserRole.EMPLOYEE, UserRole.CUSTOMER)
+    ),
+):
+    return ClaimService.list_claim_attachments(
+        db,
+        claim_id=claim_id,
+        actor=current_user,
+    )
+
+
+@router.delete(
+    "/customer/claims/{claim_id}/attachments/{attachment_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def delete_customer_claim_attachment(
+    claim_id: int,
+    attachment_id: int,
+    db: Session = Depends(get_db),
+    current_customer: User = Depends(require_roles(UserRole.CUSTOMER)),
+) -> None:
+    ClaimService.delete_customer_attachment(
+        db,
+        claim_id=claim_id,
+        attachment_id=attachment_id,
         actor=current_customer,
     )
 

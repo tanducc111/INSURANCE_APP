@@ -32,6 +32,11 @@ pnpm-debug.log*
 *.log
 tmp/
 temp/
+api/uploads/*
+!api/uploads/.gitkeep
+!api/uploads/claims/
+api/uploads/claims/*
+!api/uploads/claims/.gitkeep
 
 # Editors and OS
 .DS_Store

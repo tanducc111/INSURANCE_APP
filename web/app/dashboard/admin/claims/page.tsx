@@ -6,6 +6,7 @@ import {
   ClaimStatusBadge,
   formatClaimLabel,
 } from "@/components/claims/claim-status-badge";
+import { ClaimAttachments } from "@/components/claims/claim-attachments";
 import { DataTable } from "@/components/ui/data-table";
 import { EmptyState } from "@/components/ui/empty-state";
 import { LoadingState } from "@/components/ui/loading-state";
@@ -383,25 +384,11 @@ export default function AdminClaimsPage() {
 
               <div>
                 <h3 className="text-sm font-semibold uppercase text-slate-500">
-                  Tệp đính kèm
+                  Chứng từ khách hàng đã gửi
                 </h3>
-                {selectedClaim.attachments.length === 0 ? (
-                  <p className="mt-3 text-sm font-medium text-slate-500">
-                    Chưa có tệp đính kèm.
-                  </p>
-                ) : (
-                  <div className="mt-3 divide-y divide-slate-200">
-                    {selectedClaim.attachments.map((attachment) => (
-                      <a
-                        className="block py-2 text-sm font-semibold text-ocean"
-                        href={attachment.file_url}
-                        key={attachment.id}
-                      >
-                        {attachment.file_name}
-                      </a>
-                    ))}
-                  </div>
-                )}
+                <div className="mt-3">
+                  <ClaimAttachments attachments={selectedClaim.attachments} />
+                </div>
               </div>
             </div>
           ) : (

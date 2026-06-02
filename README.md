@@ -8,11 +8,31 @@ Full-stack insurance management system with FastAPI, PostgreSQL, Next.js App Rou
 - Admin user, employee, customer, assignment, and subscription management
 - Insurance package, process, and step management
 - Customer incident and claim reporting
+- Claim attachment upload and preview for evidence documents
 - Employee claim review and follow-up notes
 - Customer-employee REST polling chat
 - Appointment booking and employee appointment management
 - Admin, employee, and customer dashboards
 - Admin document upload and customer chatbot that answers only from uploaded company documents
+
+## Claim Evidence Uploads
+
+Customers can attach evidence when reporting an incident, including hospital bills, accident photos, repair receipts, invoices, and related medical documents.
+
+Allowed file types:
+
+- JPG/JPEG
+- PNG
+- WEBP
+- PDF
+
+Each uploaded file must be smaller than 5MB. In local development, uploaded claim files are stored under:
+
+```text
+api/uploads/claims/
+```
+
+Uploaded files are ignored by git. The `.gitkeep` files only preserve the local folder structure.
 
 ## Stack
 

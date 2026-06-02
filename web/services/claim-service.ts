@@ -1,6 +1,7 @@
 import { apiFetch } from "@/services/api-client";
 import type {
   Claim,
+  ClaimAttachment,
   ClaimIncidentType,
   ClaimPayload,
   ClaimPriority,
@@ -46,6 +47,43 @@ export function createCustomerClaim(token: string, payload: ClaimPayload) {
     body: JSON.stringify(payload),
     token,
   });
+}
+
+export function uploadCustomerClaimAttachments(
+  token: string,
+  claimId: number,
+  files: File[],
+) {
+  const formData = new FormData();
+  files.forEach((file) => formData.append("files", file));
+  return apiFetch<ClaimAttachment[]>(
+    `/customer/claims/${claimId}/attachments`,
+    {
+      method: "POST",
+      body: formData,
+      token,
+    },
+  );
+}
+
+export function listClaimAttachments(token: string, claimId: number) {
+  return apiFetch<ClaimAttachment[]>(`/claims/${claimId}/attachments`, {
+    token,
+  });
+}
+
+export function deleteCustomerClaimAttachment(
+  token: string,
+  claimId: number,
+  attachmentId: number,
+) {
+  return apiFetch<void>(
+    `/customer/claims/${claimId}/attachments/${attachmentId}`,
+    {
+      method: "DELETE",
+      token,
+    },
+  );
 }
 
 export function listCustomerClaims(token: string, params?: ClaimListParams) {

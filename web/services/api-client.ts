@@ -1,5 +1,12 @@
-const API_BASE_URL =
+export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+
+export function toApiUrl(path: string) {
+  if (path.startsWith("http://") || path.startsWith("https://")) {
+    return path;
+  }
+  return `${API_BASE_URL}${path}`;
+}
 
 type ApiFetchOptions = RequestInit & {
   token?: string | null;
