@@ -1,7 +1,3 @@
-import re
-import uuid
-from pathlib import Path
-
 from fastapi import HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
@@ -22,6 +18,11 @@ from app.schemas.claim import (
     ClaimReviewNoteUpdate,
     ClaimStatusUpdate,
 )
+from app.utils.file_storage import (
+    remove_stored_upload,
+    store_uploads,
+    validate_uploads,
+)
 
 
 ALLOWED_ATTACHMENT_TYPES = {
@@ -32,34 +33,12 @@ ALLOWED_ATTACHMENT_TYPES = {
 }
 
 
-def _claim_upload_dir() -> Path:
-    upload_dir = Path(settings.CLAIM_UPLOAD_DIR)
-    upload_dir.mkdir(parents=True, exist_ok=True)
-    return upload_dir
-
-
-def _safe_file_name(file_name: str) -> str:
-    stem = Path(file_name).stem or "tep-dinh-kem"
-    stem = re.sub(r"[^A-Za-z0-9_.-]+", "-", stem).strip(".-") or "tep-dinh-kem"
-    return stem[:80]
-
-
-def _remove_stored_file(file_url: str) -> None:
-    file_name = Path(file_url).name
-    if not file_name:
-        return
-    file_path = (_claim_upload_dir() / file_name).resolve()
-    upload_dir = _claim_upload_dir().resolve()
-    if upload_dir in file_path.parents and file_path.exists():
-        file_path.unlink()
-
-
 def _get_customer_for_user(db: Session, user: User):
     customer = CustomerRepository.get_by_user_id(db, user.id)
     if customer is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Customer profile not found",
+            detail="Không tìm thấy hồ sơ khách hàng",
         )
     return customer
 
@@ -69,7 +48,7 @@ def _get_employee_for_user(db: Session, user: User):
     if employee is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Employee profile not found",
+            detail="Không tìm thấy hồ sơ nhân viên",
         )
     return employee
 
@@ -83,7 +62,7 @@ def _ensure_employee_can_access_claim(db: Session, user: User, claim: Claim):
     if active_assignment is None or active_assignment.employee_id != employee.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Claim customer is not assigned to this employee",
+            detail="Khách hàng của hồ sơ này chưa được phân công cho nhân viên hiện tại",
         )
     return employee
 
@@ -117,7 +96,7 @@ class ClaimService:
         if subscription is None or subscription.customer_id != customer.id:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Subscription not found",
+                detail="Không tìm thấy hợp đồng bảo hiểm",
             )
 
         assignment = AssignmentRepository.get_active_for_customer(db, customer.id)
@@ -169,7 +148,7 @@ class ClaimService:
         if claim is None or claim.customer_id != customer.id:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Claim not found",
+                detail="Không tìm thấy hồ sơ bồi thường",
             )
         return claim
 
@@ -208,7 +187,7 @@ class ClaimService:
         if claim is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Claim not found",
+                detail="Không tìm thấy hồ sơ bồi thường",
             )
         _ensure_employee_can_access_claim(db, actor, claim)
         return claim
@@ -289,7 +268,7 @@ class ClaimService:
         if claim is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Claim not found",
+                detail="Không tìm thấy hồ sơ bồi thường",
             )
         return claim
 
@@ -307,7 +286,7 @@ class ClaimService:
             if employee is None:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Employee not found",
+                    detail="Không tìm thấy nhân viên",
                 )
         claim.assigned_employee_id = payload.assigned_employee_id
         AuditRepository.record_activity(
@@ -353,49 +332,36 @@ class ClaimService:
         actor: User,
     ):
         claim = ClaimService.get_customer_claim(db, claim_id=claim_id, actor=actor)
-        if not files:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="Vui lòng chọn ít nhất một tệp đính kèm.",
+        validated_files = await validate_uploads(
+            files,
+            allowed_types=ALLOWED_ATTACHMENT_TYPES,
+            max_bytes=settings.CLAIM_UPLOAD_MAX_BYTES,
+            empty_message="Vui lòng chọn ít nhất một tệp đính kèm.",
+            unsupported_message=(
+                "Định dạng tệp không được hỗ trợ. "
+                "Vui lòng tải lên JPG, PNG, WEBP hoặc PDF."
+            ),
+            oversized_message="Tệp quá lớn. Vui lòng tải lên tệp nhỏ hơn 5MB.",
+        )
+        stored_files = store_uploads(
+            validated_files,
+            upload_dir=settings.CLAIM_UPLOAD_DIR,
+            public_prefix="/uploads/claims",
+            name_prefix=str(claim.id),
+            allowed_types=ALLOWED_ATTACHMENT_TYPES,
+        )
+
+        created_attachments = [
+            ClaimAttachmentRepository.create_attachment(
+                db,
+                claim_id=claim.id,
+                file_name=stored_file.original_name,
+                file_url=stored_file.file_url,
+                mime_type=stored_file.mime_type,
+                file_size=stored_file.file_size,
             )
-
-        validated_files: list[tuple[str, str, bytes]] = []
-        for file in files:
-            mime_type = file.content_type or "application/octet-stream"
-            if mime_type not in ALLOWED_ATTACHMENT_TYPES:
-                raise HTTPException(
-                    status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-                    detail="Định dạng tệp không được hỗ trợ. Vui lòng tải lên JPG, PNG, WEBP hoặc PDF.",
-                )
-
-            content = await file.read()
-            if len(content) > settings.CLAIM_UPLOAD_MAX_BYTES:
-                raise HTTPException(
-                    status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                    detail="Tệp quá lớn. Vui lòng tải lên tệp nhỏ hơn 5MB.",
-                )
-
-            original_name = file.filename or "tep-dinh-kem"
-            validated_files.append((original_name, mime_type, content))
-
-        upload_dir = _claim_upload_dir()
-        created_attachments = []
-        for original_name, mime_type, content in validated_files:
-            extension = ALLOWED_ATTACHMENT_TYPES[mime_type]
-            stored_name = f"{claim.id}-{uuid.uuid4().hex}-{_safe_file_name(original_name)}{extension}"
-            file_path = upload_dir / stored_name
-            file_path.write_bytes(content)
-
-            created_attachments.append(
-                ClaimAttachmentRepository.create_attachment(
-                    db,
-                    claim_id=claim.id,
-                    file_name=original_name,
-                    file_url=f"/uploads/claims/{stored_name}",
-                    mime_type=mime_type,
-                    file_size=len(content),
-                )
-            )
+            for stored_file in stored_files
+        ]
 
         AuditRepository.record_activity(
             db,
@@ -441,7 +407,10 @@ class ClaimService:
         }:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Chỉ có thể xóa tệp khi hồ sơ đang chờ xử lý hoặc cần bổ sung hồ sơ.",
+                detail=(
+                    "Chỉ có thể xóa tệp khi hồ sơ đang chờ xử lý "
+                    "hoặc cần bổ sung hồ sơ."
+                ),
             )
 
         attachment = ClaimAttachmentRepository.get_by_id(db, attachment_id)
@@ -451,7 +420,10 @@ class ClaimService:
                 detail="Không tìm thấy tệp đính kèm",
             )
 
-        _remove_stored_file(attachment.file_url)
+        remove_stored_upload(
+            file_url=attachment.file_url,
+            upload_dir=settings.CLAIM_UPLOAD_DIR,
+        )
         ClaimAttachmentRepository.delete_attachment(db, attachment)
         AuditRepository.record_activity(
             db,

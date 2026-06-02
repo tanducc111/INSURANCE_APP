@@ -56,12 +56,17 @@ export function ProtectedDashboardShell({
     );
   }
 
+  const displayName =
+    user.full_name === "System Administrator"
+      ? "Quản trị viên hệ thống"
+      : user.full_name;
+
   return (
     <main className="min-h-screen bg-mist text-ink">
       <div className="grid min-h-screen lg:grid-cols-[280px_1fr]">
         <RoleSidebar user={user} />
         <section className="min-w-0 p-4 md:p-6 lg:p-8">
-          <header className="mb-6 flex items-center justify-between rounded-lg border border-border bg-white px-4 py-3 shadow-sm lg:justify-end">
+          <header className="mb-6 flex items-center justify-between gap-4 rounded-lg border border-border bg-white px-4 py-3 shadow-sm lg:justify-end">
             <div className="flex items-center gap-3 lg:hidden">
               <button
                 aria-label="Mở điều hướng"
@@ -75,13 +80,15 @@ export function ProtectedDashboardShell({
                 Bảo hiểm Việt
               </div>
             </div>
-            <div className="hidden text-right md:block">
-              <p className="text-sm font-bold text-ink">{user.full_name}</p>
+            <div className="hidden min-w-0 text-right md:block">
+              <p className="max-w-56 truncate text-sm font-bold text-ink">
+                {displayName}
+              </p>
               <p className="text-xs font-semibold text-muted">
                 {roleLabel(user.role)}
               </p>
             </div>
-            <LogoutButton />
+            <LogoutButton compact />
           </header>
           {children}
         </section>

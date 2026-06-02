@@ -39,6 +39,8 @@ services:
       GEMINI_MODEL: ${GEMINI_MODEL:-gemini-1.5-flash}
       RAG_MIN_SCORE: ${RAG_MIN_SCORE:-0.08}
       RAG_TOP_K: ${RAG_TOP_K:-5}
+      CLAIM_UPLOAD_DIR: ${CLAIM_UPLOAD_DIR:-uploads/claims}
+      CLAIM_UPLOAD_MAX_BYTES: ${CLAIM_UPLOAD_MAX_BYTES:-5242880}
     depends_on:
       postgres:
         condition: service_healthy
