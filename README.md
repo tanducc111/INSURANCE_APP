@@ -188,6 +188,10 @@ Không commit giá trị bí mật thật lên repository.
 | `AI_PROVIDER` | Nhà cung cấp AI, hiện hỗ trợ cấu hình `gemini` và fallback local |
 | `RAG_TOP_K` | Số đoạn tài liệu ưu tiên khi truy xuất RAG |
 | `RAG_MIN_SCORE` | Ngưỡng điểm tối thiểu để coi đoạn tài liệu là liên quan |
+| `RAG_MAX_CHUNKS_PER_DOCUMENT` | Giới hạn số đoạn được xử lý cho mỗi tài liệu, mặc định `80` |
+| `RAG_ENTITY_EXTRACTION_BATCH_SIZE` | Số đoạn xử lý mỗi batch khi trích xuất thực thể/quan hệ |
+| `RAG_PROCESSING_MODE` | Chế độ xử lý tài liệu, mặc định `background` |
+| `DOCUMENT_UPLOAD_DIR` | Thư mục lưu tài liệu PDF/TXT/Markdown trong môi trường local |
 | `CLAIM_UPLOAD_DIR` | Thư mục lưu chứng từ bồi thường local |
 | `CLAIM_UPLOAD_MAX_BYTES` | Dung lượng tối đa mỗi file upload |
 
@@ -198,14 +202,17 @@ Trợ lý AI được thiết kế để trả lời khách hàng dựa trên t�
 Luồng hoạt động:
 
 1. Admin tải lên PDF/TXT/Markdown trong trang Tài liệu AI.
-2. Backend trích xuất nội dung văn bản.
-3. Hệ thống chia tài liệu thành các đoạn nhỏ.
-4. Graph RAG ingestion trích xuất thực thể và quan hệ từ từng đoạn.
-5. Các đoạn tài liệu, thực thể và quan hệ được lưu vào database.
-6. Khách hàng đặt câu hỏi trong trang Trợ lý bảo hiểm AI.
-7. Hệ thống truy xuất đoạn tài liệu, thực thể và quan hệ liên quan.
-8. Gemini nhận ngữ cảnh đã truy xuất và tạo câu trả lời tiếng Việt.
-9. Nếu tài liệu không có thông tin phù hợp, chatbot từ chối lịch sự:
+2. API lưu file, tạo bản ghi tài liệu và trả phản hồi ngay để tránh timeout khi PDF lớn.
+3. FastAPI BackgroundTasks xử lý tài liệu trong nền với trạng thái `uploaded`, `processing`, `completed` hoặc `failed`.
+4. Backend trích xuất nội dung văn bản.
+5. Hệ thống chia tài liệu thành các đoạn nhỏ và bỏ qua đoạn trùng lặp.
+6. Graph RAG ingestion trích xuất thực thể và quan hệ từ từng đoạn.
+7. Các đoạn tài liệu, thực thể và quan hệ được lưu vào database.
+8. Chatbot chỉ truy xuất các tài liệu đã xử lý xong với trạng thái `completed`.
+9. Khách hàng đặt câu hỏi trong trang Trợ lý bảo hiểm AI.
+10. Hệ thống truy xuất đoạn tài liệu, thực thể và quan hệ liên quan.
+11. Gemini nhận ngữ cảnh đã truy xuất và tạo câu trả lời tiếng Việt.
+12. Nếu tài liệu không có thông tin phù hợp, chatbot từ chối lịch sự:
 
 ```text
 Xin lỗi, thông tin này chưa có trong tài liệu nội bộ của công ty. Vui lòng liên hệ nhân viên phụ trách để được hỗ trợ thêm.

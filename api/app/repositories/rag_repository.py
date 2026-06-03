@@ -11,12 +11,7 @@ from app.models.rag import (
 
 
 def _document_options():
-    return (
-        joinedload(Document.uploaded_by),
-        joinedload(Document.chunks),
-        joinedload(Document.entities),
-        joinedload(Document.relationships),
-    )
+    return (joinedload(Document.uploaded_by),)
 
 
 def _chunk_options():
@@ -82,12 +77,16 @@ class DocumentRepository:
         content_type: str,
         raw_text: str,
         uploaded_by_user_id: int | None,
+        source_file_path: str | None = None,
+        processing_status: str = "uploaded",
     ) -> Document:
         document = Document(
             title=title,
             file_name=file_name,
             content_type=content_type,
             raw_text=raw_text,
+            source_file_path=source_file_path,
+            processing_status=processing_status,
             uploaded_by_user_id=uploaded_by_user_id,
         )
         db.add(document)
@@ -141,10 +140,15 @@ class DocumentChunkRepository:
             select(DocumentChunk)
             .options(*_chunk_options())
             .join(DocumentChunk.document)
+            .where(Document.processing_status == "completed")
             .order_by(DocumentChunk.created_at.desc())
             .limit(limit)
         )
         return list(db.scalars(query))
+
+    @staticmethod
+    def delete_for_document(db: Session, document_id: int) -> None:
+        db.query(DocumentChunk).filter(DocumentChunk.document_id == document_id).delete()
 
 
 class RagEntityRepository:
@@ -199,7 +203,9 @@ class RagEntityRepository:
         query = (
             select(RagEntity)
             .options(*_entity_options())
+            .join(RagEntity.document)
             .where(or_(*filters))
+            .where(Document.processing_status == "completed")
             .order_by(RagEntity.created_at.desc())
             .limit(limit)
         )
@@ -213,10 +219,16 @@ class RagEntityRepository:
             db.scalars(
                 select(RagEntity)
                 .options(*_entity_options())
+                .join(RagEntity.document)
                 .where(RagEntity.chunk_id.in_(chunk_ids))
+                .where(Document.processing_status == "completed")
                 .order_by(RagEntity.name.asc())
             )
         )
+
+    @staticmethod
+    def delete_for_document(db: Session, document_id: int) -> None:
+        db.query(RagEntity).filter(RagEntity.document_id == document_id).delete()
 
 
 class RagRelationshipRepository:
@@ -265,14 +277,22 @@ class RagRelationshipRepository:
         query = (
             select(RagRelationship)
             .options(*_relationship_options())
+            .join(RagRelationship.document)
             .where(
                 (RagRelationship.source_entity_id.in_(entity_ids))
                 | (RagRelationship.target_entity_id.in_(entity_ids))
             )
+            .where(Document.processing_status == "completed")
             .order_by(RagRelationship.created_at.desc())
             .limit(limit)
         )
         return list(db.scalars(query).unique())
+
+    @staticmethod
+    def delete_for_document(db: Session, document_id: int) -> None:
+        db.query(RagRelationship).filter(
+            RagRelationship.document_id == document_id
+        ).delete()
 
 
 class RagChatLogRepository:

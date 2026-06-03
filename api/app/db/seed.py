@@ -604,6 +604,9 @@ def seed_rag_documents(db: Session, *, admin: User) -> None:
             file_name=file_name,
             content_type=content_type,
             raw_text=" ".join(raw_text.split()),
+            processing_status="completed",
+            page_count=0,
+            extracted_character_count=len(" ".join(raw_text.split())),
             uploaded_by_user_id=admin.id,
         )
         db.add(document)
@@ -621,6 +624,18 @@ def seed_rag_documents(db: Session, *, admin: User) -> None:
             chunks.append(chunk)
         db.flush()
         GraphRagIngestionService.ingest_chunks(db, chunks=chunks)
+        db.flush()
+        document.chunk_count = len(chunks)
+        document.entity_count = db.query(RagEntity).filter_by(document_id=document.id).count()
+        document.relationship_count = (
+            db.query(RagRelationship).filter_by(document_id=document.id).count()
+        )
+        chunk_lengths = [len(chunk.content or "") for chunk in chunks]
+        document.average_chunk_length = (
+            round(sum(chunk_lengths) / len(chunk_lengths)) if chunk_lengths else 0
+        )
+        document.max_chunk_length = max(chunk_lengths) if chunk_lengths else 0
+        document.skipped_duplicate_chunks = 0
     db.flush()
 
 

@@ -1,4 +1,4 @@
-from sqlalchemy import Float, ForeignKey, Integer, JSON, String, Text
+﻿from sqlalchemy import Float, ForeignKey, Integer, JSON, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, IDMixin, TimestampMixin
@@ -11,6 +11,22 @@ class Document(IDMixin, TimestampMixin, Base):
     file_name: Mapped[str] = mapped_column(String(255), nullable=False)
     content_type: Mapped[str] = mapped_column(String(120), nullable=False)
     raw_text: Mapped[str] = mapped_column(Text, nullable=False)
+    source_file_path: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    processing_status: Mapped[str] = mapped_column(
+        String(30),
+        nullable=False,
+        default="uploaded",
+        index=True,
+    )
+    processing_error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    chunk_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    entity_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    relationship_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    skipped_duplicate_chunks: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    page_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    extracted_character_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    average_chunk_length: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    max_chunk_length: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     uploaded_by_user_id: Mapped[int | None] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL"),
         nullable=True,
@@ -37,16 +53,9 @@ class Document(IDMixin, TimestampMixin, Base):
     )
 
     @property
-    def chunk_count(self) -> int:
-        return len(self.chunks)
-
-    @property
-    def entity_count(self) -> int:
-        return len(self.entities)
-
-    @property
-    def relationship_count(self) -> int:
-        return len(self.relationships)
+    def conflict_warning(self) -> str | None:
+        # Conflict is detected from retrieved graph relationships, not document text.
+        return None
 
     @property
     def uploaded_by_name(self) -> str | None:

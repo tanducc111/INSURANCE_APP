@@ -13,6 +13,14 @@ class DocumentRead(BaseModel):
     chunk_count: int
     entity_count: int
     relationship_count: int
+    skipped_duplicate_chunks: int
+    page_count: int
+    extracted_character_count: int
+    average_chunk_length: int
+    max_chunk_length: int
+    conflict_warning: str | None
+    processing_status: str
+    processing_error: str | None
     uploaded_by_user_id: int | None
     uploaded_by_name: str | None
     created_at: datetime

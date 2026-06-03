@@ -58,6 +58,16 @@ export function deleteDocument(token: string, documentId: number) {
   });
 }
 
+export function reprocessDocument(token: string, documentId: number) {
+  return apiFetch<DocumentRecord>(
+    `/admin/documents/${documentId}/reprocess`,
+    {
+      method: "POST",
+      token,
+    },
+  );
+}
+
 export function askChatbot(token: string, question: string) {
   return apiFetch<ChatbotAnswer>("/customer/chatbot/query", {
     method: "POST",

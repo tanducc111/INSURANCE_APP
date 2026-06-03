@@ -1,4 +1,14 @@
-from fastapi import APIRouter, Depends, File, Form, Query, Response, UploadFile, status
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    File,
+    Form,
+    Query,
+    Response,
+    UploadFile,
+    status,
+)
 from sqlalchemy.orm import Session
 
 from app.core.auth import require_roles
@@ -22,17 +32,20 @@ router = APIRouter(tags=["rag"])
     status_code=status.HTTP_201_CREATED,
 )
 async def upload_document(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     title: str | None = Form(default=None),
     db: Session = Depends(get_db),
     current_admin: User = Depends(require_roles(UserRole.ADMIN)),
 ) -> Document:
-    return await DocumentService.upload_document(
+    document = await DocumentService.upload_document(
         db,
         file=file,
         title=title,
         actor=current_admin,
     )
+    background_tasks.add_task(DocumentService.process_document_background, document.id)
+    return document
 
 
 @router.get("/admin/documents", response_model=list[DocumentRead])
@@ -80,6 +93,22 @@ async def delete_document(
 ) -> Response:
     DocumentService.delete_document(db, document_id=document_id, actor=current_admin)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post("/admin/documents/{document_id}/reprocess", response_model=DocumentRead)
+async def reprocess_document(
+    document_id: int,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(require_roles(UserRole.ADMIN)),
+) -> Document:
+    document = DocumentService.reprocess_document(
+        db,
+        document_id=document_id,
+        actor=current_admin,
+    )
+    background_tasks.add_task(DocumentService.process_document_background, document.id)
+    return document
 
 
 @router.post("/customer/chatbot/query", response_model=ChatbotAnswer)

@@ -30,6 +30,10 @@ class Settings(BaseSettings):
     GEMINI_MODEL: str = "gemini-1.5-flash"
     RAG_MIN_SCORE: float = 0.08
     RAG_TOP_K: int = 5
+    RAG_MAX_CHUNKS_PER_DOCUMENT: int = 80
+    RAG_ENTITY_EXTRACTION_BATCH_SIZE: int = 5
+    RAG_PROCESSING_MODE: str = "background"
+    DOCUMENT_UPLOAD_DIR: str = "uploads/documents"
     CLAIM_UPLOAD_DIR: str = "uploads/claims"
     CLAIM_UPLOAD_MAX_BYTES: int = 5 * 1024 * 1024
 

@@ -6,6 +6,14 @@ export type DocumentRecord = {
   chunk_count: number;
   entity_count: number;
   relationship_count: number;
+  skipped_duplicate_chunks: number;
+  page_count: number;
+  extracted_character_count: number;
+  average_chunk_length: number;
+  max_chunk_length: number;
+  conflict_warning: string | null;
+  processing_status: string;
+  processing_error: string | null;
   uploaded_by_user_id: number | null;
   uploaded_by_name: string | null;
   created_at: string;
